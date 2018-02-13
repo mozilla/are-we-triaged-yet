@@ -1,0 +1,63 @@
+* {
+  box-sizing: border-box;
+  font-family: 'Fira Sans', sans-serif
+}
+
+body {
+  margin: 0;
+  padding: 2vw;
+  height: 100vh;
+  width: 100vw;
+}
+
+h1 {
+  margin: 0;
+  line-height: 120%;
+  font-family: 'Zilla Slab Highlight', serif;
+  font-weight: bold;
+}
+
+h2 {
+  margin: 0;
+  font-family: 'Zilla Slab', serif;
+  font-weight: 600;
+  align-self: center;
+}
+
+main {
+  display: grid;
+  grid-gap: 1vw;
+}
+
+@media (min-width: 750px) {
+  main div {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  main h3 {
+    grid-column: span 2;
+  }
+}
+
+table {
+  width: 100%;
+}
+
+thead td {
+  text-align: center;
+  font-size: small;
+}
+
+tbody td {
+  padding-left: 1vw;
+}
+
+tbody td:nth-of-type(2n) {
+  text-align: right;
+  padding-right: 1vw;
+}
+
+tbody tr:nth-of-type(2n) {
+  background-color: grey;
+  color: white;
+}
