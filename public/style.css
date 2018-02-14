@@ -58,7 +58,7 @@ body.single-report main {
 }
 
 body.single-report thead li {
-  font-size: larger;
+  font-size: large;
 }
 
 @media (min-width: 750px) {
