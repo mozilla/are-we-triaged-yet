@@ -29,8 +29,40 @@ main {
   grid-gap: 1vw;
 }
 
+body.single-report {
+  font-size: 2vw;
+}
+
+body.single-report header {
+  display: grid;
+  grid: "logo report-name" auto
+        "title report-name" auto / auto 1fr;
+}
+
+body.single-report header h1 {
+  grid-area: logo;
+}
+
+body.single-report header h2 {
+  grid-area: title;
+}
+
+body.single-report header h3 {
+  grid-area: report-name;
+  text-align: right;
+}
+
+
+body.single-report main {
+  grid-template-columns: 1fr;
+}
+
+body.single-report thead li {
+  font-size: larger;
+}
+
 @media (min-width: 750px) {
-  main div {
+  main {
     grid-template-columns: repeat(2, 1fr);
   }
 
@@ -46,6 +78,26 @@ table {
 thead td {
   text-align: center;
   font-size: small;
+}
+
+thead ul {
+  margin: 0px;
+  padding: 0px;
+  text-align: center;
+}
+
+thead li {
+  list-style-type: none;
+  text-align: center;
+  display: inline;
+}
+
+thead li::after {
+  content: ' • ';
+}
+
+thead li:last-of-type::after {
+  content: none
 }
 
 tbody td {

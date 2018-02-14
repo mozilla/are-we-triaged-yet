@@ -72,11 +72,24 @@ function renderStats(args) {
         } else {
           versions = getArgument('versions', args, body.stats.versions);
           reportNames = getArgument('reports', args, body.stats.versions[versions[0]]);
+
+          // hack to fix page grid when we display one report
+          if (reportNames.length === 1) {
+            document.body.classList.add('single-report');
+          }
+
           reportNames.forEach(name => {
             reportTitles[name] = body.stats.versions[versions[0]][name].title;
           });
           reportNames.forEach(name => {
-            main.insertAdjacentHTML('beforeend', `<h3>${reportTitles[name]}</h3>`);
+
+            //TODO: fix this hack 
+            if (reportNames.length === 1) {
+              document.querySelector('.report-name').textContent = reportTitles[name];
+            } else {
+              main.insertAdjacentHTML('beforeend', `<h3>${reportTitles[name]}</h3>`);
+            }
+
             versions.forEach(version => {
               main.insertAdjacentHTML('beforeend', 
                                     getTable(body.stats.versions[version], version, name, all));
@@ -109,13 +122,13 @@ function getTable(stats, version, report, all) {
               <th colspan="2">Firefox <span class="versionNumber">${version}</span></th>
             </tr>
             <tr>
-              <td colspan="2">All components: ${stats[report].count} bug(s)</td>
-            </tr>
-            <tr>
-              <td colspan="2">Components with bugs: ${numComponents}</td>
-            </tr>
-            <tr>
-              <td colspan="2">Avg. bugs/component with bugs: ${avg}</td>
+              <td colspan="2">
+                <ul>
+                  <li>All components: ${stats[report].count} bug(s)</li>
+                  <li>Components with bugs: ${numComponents}</li>
+                  <li>Avg. bugs/component with bugs: ${avg}</li>
+                </ul>
+              </td>
             </tr>
           </thead>
           <tbody>
