@@ -24,6 +24,27 @@ h2 {
   align-self: center;
 }
 
+
+ul {
+  margin: 0px;
+  padding: 0px;
+  text-align: center;
+}
+
+li {
+  list-style-type: none;
+  text-align: center;
+  display: inline;
+}
+
+li::after {
+  content: ' • ';
+}
+
+li:last-of-type::after {
+  content: none
+}
+
 main {
   display: grid;
   grid-gap: 1vw;
@@ -52,7 +73,6 @@ body.single-report header h3 {
   text-align: right;
 }
 
-
 body.single-report main {
   grid-template-columns: 1fr;
 }
@@ -80,26 +100,6 @@ thead td {
   font-size: small;
 }
 
-thead ul {
-  margin: 0px;
-  padding: 0px;
-  text-align: center;
-}
-
-thead li {
-  list-style-type: none;
-  text-align: center;
-  display: inline;
-}
-
-thead li::after {
-  content: ' • ';
-}
-
-thead li:last-of-type::after {
-  content: none
-}
-
 tbody tr:first-of-type td {
   border-top: solid 1px black;
 }
@@ -116,4 +116,9 @@ tbody td:nth-of-type(2n) {
 tbody tr:nth-of-type(2n) {
   background-color: grey;
   color: white;
+}
+
+footer {
+  margin-top: 4vh;
+  margin-bottom: 2vh;
 }
