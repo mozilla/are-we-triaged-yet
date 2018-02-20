@@ -20,7 +20,7 @@ function update() {
   });
 }
 
-var timeout = setTimeout(update, hourly);
+var timeout = setInterval(update, hourly);
 
 // get first set of data
 update();
