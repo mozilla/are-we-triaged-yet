@@ -103,16 +103,19 @@ function renderStats(args) {
   
 function getTable(stats, version, report, all) {
   var str = '', rows = '';
-  var numComponents = stats[report].ranks.length;
-  var avg = (numComponents > 0) ? Math.floor(stats[report].count/numComponents) : 0;
-  
+  // refer to report data fields 
+  var reportFields = stats[report];
+  var numComponents = reportFields.ranks.length;
+  var avg = (numComponents > 0) ? Math.floor(reportFields.count/numComponents) : 0;
   // if we don't show all, show top ten
-  var reportData = all ? stats[report].ranks : stats[report].ranks.slice(0, 10);
-  
+  var reportData = all ? reportFields.ranks : reportFields.ranks.slice(0, 10);
+
   reportData.forEach(rank => {
     rows += `<tr>
               <td>${rank.component}</td>
-              <td>${rank.count}</td>
+              <td>
+                <a href="${reportFields.buglist}&product=${rank.productName}&component=${rank.componentName}">${rank.count}</a>
+              </td>
             </tr>`;
   });
   
@@ -124,7 +127,7 @@ function getTable(stats, version, report, all) {
             <tr>
               <td colspan="2">
                 <ul>
-                  <li>All components: ${stats[report].count} bugs</li>
+                  <li>All components: <a href="${reportFields.buglist}">${reportFields.count}</a> bugs</li>
                   <li>Components with bugs: ${numComponents}</li>
                   <li>Avg. bugs/component with bugs: ${avg}</li>
                 </ul>
