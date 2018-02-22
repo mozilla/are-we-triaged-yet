@@ -129,8 +129,8 @@ var GenerateStats = function(versions) {
     
     return Promise.all(requests).then(() => {
         return stats;
-    }).
-    catch(err => console.log(err));
+    })
+    .catch(err => console.log(err));
     
 }
 
