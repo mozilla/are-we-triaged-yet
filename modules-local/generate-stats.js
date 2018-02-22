@@ -128,29 +128,6 @@ var GenerateStats = function(versions) {
     } 
     
     return Promise.all(requests).then(() => {
-        /*
-        var str = ''; 
-
-        Object.keys(stats.versions).forEach(version => {
-            str += `Firefox ${version}\n\n`;
-            Object.keys(stats.versions[version]).forEach(stat => {
-                str += `${stat} ${stats.versions[version][stat].count}\n`;
-                str += '-------\n';
-                stats.versions[version][stat].ranks.forEach(rank => {
-                    str += `${rank.component} ${rank.count}\n`;
-                });
-                str += '\n';
-            });
-            str += `\n`;
-        });
-        str += 'New bugs\n';
-        str += '-------\n';
-        stats.newBugs.forEach(day => {
-            str += `${day.date} ${day.count}\n`;
-        });
-
-        stats.report = str;
-        */
         return stats;
     }).
     catch(err => console.log(err));
