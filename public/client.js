@@ -127,7 +127,7 @@ function getTable(stats, version, report, all) {
             <tr>
               <td colspan="2">
                 <ul>
-                  <li>All components: <a href="${reportFields.buglist}">${reportFields.count}</a> bugs</li>
+                  <li>All components: <a href="${reportFields.buglistAll}">${reportFields.count}</a> bugs</li>
                   <li>Components with bugs: ${numComponents}</li>
                   <li>Avg. bugs/component with bugs: ${avg}</li>
                 </ul>
