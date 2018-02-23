@@ -22,8 +22,8 @@ var GenerateStats = function(config) {
         }, '');
     }
 
-    if (config.exclusions && isArray(config.exclusions)) {
-        exclusionList = encodeURIComponent(config.exclusions.reduce((list,component) => {
+    if (config.exclude && isArray(config.exclude)) {
+        exclusionList = encodeURIComponent(config.exclude.reduce((list,component) => {
             return list + ',' + component;
         }, ''));
     }
