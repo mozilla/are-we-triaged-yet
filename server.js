@@ -2,17 +2,23 @@
 
 const express = require('express');
 const GenerateStats = require('./modules-local/generate-stats');
-const versions = [
+const config = {
+  products: ['Core', 'External Software Affecting Firefox',
+             'Firefox', 'Firefox for iOS', 'Firefox for Android',
+             'NSPR', 'NSS', 'Toolkit'],
+  exclude: ['build conf', 'ca cert'], // components to exclude, can be partial strings
+  versions: [
     {number: 59, mergedate: '2017-11-13', betadate: '2018-01-22'},
     {number: 60, mergedate: '2018-01-22', betadate: '2018-03-12'}
-];
+  ]
+};
 var   data = {stats: false, message: 'not ready, please refetch'};
 const hourly = 60*60*1000;
 
 // Method to periodically run to generate stats
 
 function update() {
-  var myStats = new GenerateStats(versions);
+  var myStats = new GenerateStats(config);
 
   myStats.then(stats => {
     console.log(stats.report);
@@ -40,6 +46,6 @@ app.get("/data", function (request, response) {
 });
 
 // listen for requests :)
-var listener = app.listen(process.env.PORT, function () {
+var listener = app.listen(process.env.PORT || 8080, function () {
   console.log('Your app is listening on port ' + listener.address().port);
 });

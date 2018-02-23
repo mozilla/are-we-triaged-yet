@@ -10,6 +10,10 @@ body {
   width: 100vw;
 }
 
+a {
+  text-decoration: none;
+}
+
 h1 {
   margin: 0;
   line-height: 120%;
@@ -117,6 +121,10 @@ tbody tr:nth-of-type(2n) {
   background-color: grey;
   color: white;
 }
+
+tbody tr:nth-of-type(2n) a {
+  color: paleturquoise;
+} 
 
 footer {
   margin-top: 4vh;
