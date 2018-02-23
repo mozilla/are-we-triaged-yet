@@ -32,7 +32,7 @@ var GenerateStats = function(config) {
     Count bugs filed in last week
     */
 
-    requests.push(fetch(`https://bugzilla.mozilla.org/rest/bug?include_fields=id,creation_time,status,resolution,component,product${productList}&chfield=[Bug%20creation]&chfieldfrom=-1w&chfieldto=Now&email1=intermittent-bug-filer%40mozilla.bugs&emailreporter1=1&emailtype1=notequals&f1=component&f3=bug_severity&f4=short_desc&f5=component&f6=component&f7=component&limit=0&o1=notequals&o3=notequals&o4=notsubstring&o5=notequals&o6=notsubstring&o7=notequals&short_desc=^\\[meta&short_desc_type=notregexp&v1=Graphics%3A%20WebRender&v3=enhancement&v4=[meta]&v5=Build%20Config&v6=CA%20Certificat`)
+    requests.push(fetch(`https://bugzilla.mozilla.org/rest/bug?include_fields=id,creation_time,status,resolution,component,product&chfield=%5BBug%20creation%5D&chfieldfrom=-1w&chfieldto=Now&email1=intermittent-bug-filer%40mozilla.bugs&emailreporter1=1&emailtype1=notequals&f1=component&f2=bug_severity&keywords=meta&keywords_type=nowords&limit=0&o1=nowordssubstr&o2=notequals${productList}&short_desc=%5E%5C%5Bmeta%5C%5D&short_desc_type=notregexp&v1=${exclusionList}&v2=enhancement`)
         .then(response => {
             if (response.ok) {
                 response.json()
