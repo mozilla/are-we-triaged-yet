@@ -89,7 +89,9 @@ var GenerateStats = function(config) {
         var queries    = [
           {name: 'untriaged', title: 'Pending untriaged', url: `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component&chfield=%5BBug%20creation%5D&chfieldfrom=${mergedate}&chfieldto=Now&f2=cf_status_${versionStr}&f3=bug_severity&f4=short_desc&f5=component&limit=0&o2=anywords&o3=notequals&o4=notsubstring&o5=nowordssubstr&priority=--${productList}&resolution=---&short_desc=%5E%5C%5Bmeta&short_desc_type=notregexp&v2=%3F%2C---&v3=enhancement&v4=%5Bmeta%5D&v5=${exclusionList}`, buglist: `https://bugzilla.mozilla.org/buglist.cgi?chfield=%5BBug%20creation%5D&chfieldfrom=${mergedate}&chfieldto=Now&f2=cf_status_${versionStr}&f3=bug_severity&f4=short_desc&f5=component&o2=anywords&o3=notequals&o4=notsubstring&o5=nowordssubstr&priority=--&resolution=---&short_desc=%5E%5C%5Bmeta&short_desc_type=notregexp&v2=%3F%2C---&v3=enhancement&v4=%5Bmeta%5D&v5=${exclusionList}&order=bug_id&limit=0`},
           {name: 'affecting', title:'P1 affecting or may affect', url: `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component&f1=bug_severity&f10=CP&f11=component&f2=short_desc&f3=OP&f4=cf_status_${versionStr}&f5=OP&f6=cf_status_${versionStr}&f7=creation_ts&f8=CP&j3=OR&j5=OR&limit=0&o1=notequals&o11=nowordssubstr&o2=notregexp&o4=equals&o6=anywords&o7=greaterthaneq&priority=P1&${productList}&resolution=---&v1=enhancement&v11=${exclusionList}&v2=%5E%5C%5Bmeta&v4=affected&v6=---%2C%3F&v7=${mergedate}`, buglist: `https://bugzilla.mozilla.org/buglist.cgi?f1=bug_severity&f10=CP&f11=component&f2=short_desc&f3=OP&f4=cf_status_${versionStr}&f5=OP&f6=cf_status_${versionStr}&f7=creation_ts&f8=CP&j3=OR&j5=OR&o1=notequals&o11=nowordssubstr&o2=notregexp&o4=equals&o6=anywords&o7=greaterthaneq&priority=P1&resolution=---&v1=enhancement&v11=${exclusionList}&v2=%5E%5C%5Bmeta&v4=affected&v6=---%2C%3F&v7=${mergedate}&order=bug_id&limit=0`},
-          {name: 'uplifted', title: 'Uplifted', url: `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component&chfield=resolution&chfieldfrom=${betadate}&chfieldto=Now&chfieldvalue=FIXED&f2=flagtypes.name&f3=component&f4=cf_status_${versionStr}&f5=attachments.ispatch&n3=1&o2=equals&o3=anywordssubstr&o4=equals${productList}&v2=approval-mozilla-beta%2B&v3=${exclusionList}&v4=fixed`, buglist: `https://bugzilla.mozilla.org/buglist.cgi?v4=fixed&o3=anywordssubstr&v3=${exclusionList}&o2=equals&f4=cf_status_${versionStr}&chfieldto=Now&query_format=advanced&chfield=resolution&chfieldfrom=${betadate}&f3=component&o4=equals&f2=flagtypes.name&chfieldvalue=FIXED&f5=attachments.ispatch&v2=approval-mozilla-beta%2B&n3=1`}, 
+          {name: 'uplifted', title: 'Uplifted', url: 
+          `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component&chfield=cf_status_${versionStr}&chfieldfrom=${betadate}&chfieldto=Now&chfieldvalue=fixed&f2=flagtypes.name&f5=attachments.ispatch&o2=equals&v2=approval-mozilla-beta%2B`, buglist: 
+          `https://bugzilla.mozilla.org/buglist.cgi?o2=equals&chfieldto=Now&query_format=advanced&chfield=cf_status_${versionStr}&chfieldfrom=${betadate}&f2=flagtypes.name&chfieldvalue=fixed&f5=attachments.ispatch&v2=approval-mozilla-beta%2B`, showAll: true},
           {name: 'fix_or_defer', title: 'Fix or defer', url: `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component&f1=component&f2=cf_status_${versionStr}&n1=1&o1=anywordssubstr&o2=equals&priority=P1${productList}&resolution=---&v1=${exclusionList}&v2=affected`, buglist: `https://bugzilla.mozilla.org/buglist.cgi?priority=P1&f1=component&o1=anywordssubstr&resolution=---&o2=equals&n1=1&query_format=advanced&f2=cf_status_${versionStr}&v1=${exclusionList}&v2=affected`}
         ];
  
@@ -101,10 +103,16 @@ var GenerateStats = function(config) {
                     if (response.ok)
                     response.json()
                     .then(data => {
+                        var buglistAll;
+                        if (query.showAll && query.showAll === true) {
+                            buglistAll = query.buglist;
+                        } else {
+                            buglistAll = query.buglist + productList;
+                        }
                         stats.versions[version.number][query.name] = {
                             title: query.title,
                             buglist: query.buglist,
-                            buglistAll: query.buglist + productList,
+                            buglistAll: buglistAll,
                             count: data.bugs.length,
                             ranks: rankComponents(data.bugs)
                         };
