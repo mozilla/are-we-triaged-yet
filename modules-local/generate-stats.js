@@ -49,7 +49,10 @@ var GenerateStats = function(config) {
     function processData(data) {
         var dateString;
         var dateFiled;
-        var counts = {};
+        var counts = {
+            dates: {},
+            products: {}
+        };
         var list = [];
         
         data.bugs.forEach(bug => {
@@ -58,6 +61,40 @@ var GenerateStats = function(config) {
             dateString = [dateFiled.getUTCFullYear(), dateFiled.getUTCMonth()+1, dateFiled.getUTCDate()]
             .join('-');
 
+            // overall counts
+            if (counts.dates[dateString]) {
+                counts.dates[dateString] ++;
+            } else {
+                counts.dates[dateString] = 1;
+            }
+
+            // product counts
+            if (counts.products[bug.product]) {
+                if (counts.products[bug.product].dates[dateString]) {
+                    counts.products[bug.product].dates[dateString] ++
+                } else {
+                    counts.products[bug.product].dates[dateString] = 1
+                }
+            } else {
+                counts.products[bug.product] = {};
+                counts.products[bug.product].dates = {};
+                counts.products[bug.product].components = {}
+                counts.products[bug.product].dates[dateString] = 1;
+            }
+
+            // component counts
+            if (counts.products[bug.product].components[bug.component]) {
+                if (counts.products[bug.product].components[bug.component].dates[dateString]) {
+                    counts.products[bug.product].components[bug.component].dates[dateString] ++
+                } else {
+                    counts.products[bug.product].components[bug.component].dates[dateString] = 1
+                }
+            } else {
+                counts.products[bug.product].components[bug.component] = {};
+                counts.products[bug.product].components[bug.component].dates = {};
+                counts.products[bug.product].components[bug.component].dates[dateString] = 1;
+            }
+/*
             // overall counts
             if (counts[dateString]) {
                 counts[dateString].total ++;
@@ -81,9 +118,9 @@ var GenerateStats = function(config) {
             } else {
                 counts[dateString].products[bug.product].components[bug.component] = 1;
             }
-
+*/
         });
-        
+
         // sort by dates
         
         Object.keys(counts).forEach(date => {

@@ -5,15 +5,20 @@ document.onreadystatechange = () => {
   if (document.readyState === 'interactive') {
     main = document.querySelector('main');
     args = getArguments();
-    renderStats(args);
-    window.setInterval(renderStats, 60*1000, args);
+    if (args.counts) {
+      renderCounts(args);
+      window.setInterval(renderCounts, 60*1000, args);
+    } else { 
+      renderStats(args);
+      window.setInterval(renderStats, 60*1000, args);
+    }
   }
 };
 
 function getArguments() {
   
   var query = document.location.search;
-  var args  = { versions: 'all', reports: 'all', all: false } 
+  var args  = { versions: 'all', reports: 'all', all: false, counts: false } 
   
   query.slice(1).split('&').forEach(pair => {
     var kv = pair.split('=');
@@ -28,6 +33,9 @@ function getArguments() {
     if (kv[0] === 'all') {
       args.all = true; 
     } 
+    if (kv[0] === 'counts') {
+      args.counts = true;
+    }
   });
 
   return args;
@@ -59,14 +67,15 @@ function renderStats(args) {
   if (args.all && args.all === true) {
     all = true;
   }
+
+  // clean up 
+  main.innerHTML = '';
   
   fetch('/data')
   .then(response => {
     if(response.ok) {
       response.json()
       .then(body => {
-        // clean up 
-        main.innerHTML = '';
         if (!body.stats) {
           main.insertAdjacentHTML('beforeend', `<p>Still fetching data, will automatically reload.</p>`);
         } else {
@@ -97,6 +106,29 @@ function renderStats(args) {
           });
         }
       });
+    }
+  });
+}
+
+
+function renderCounts(args) {
+  var all;
+
+  // cleanup
+  document.body.classList.add('single-report');
+  if (args.all && args.all === true) {
+    all = true;
+  }
+  main.innerHTML = '';
+  document.querySelector('.report-name').textContent = 'New Bug Counts';
+
+  fetch('/data')
+  .then(response => {
+    if(response.ok) {
+      response.json()
+      .then(body => {
+        main.insertAdjacentHTML('beforeend', getCountTable(body.stats.bugCounts, all));
+      })
     }
   });
 }
@@ -139,5 +171,41 @@ function getTable(stats, version, report, all) {
           </tbody>
         </table></div>`;
   
+  return str;
+}
+
+function getCountTable(data, all) {
+  var str = '', rows = [], headers = '';
+  
+  Object.keys(data.dates).forEach(date => { 
+    headers += `<th>${date}</th>`;
+  });
+
+  Object.keys(data.products).forEach(product => {
+    var row = `<tr>
+                <td>${product}</td>`;
+    Object.keys(data.dates).forEach(date => {
+      var count = data.products[product].dates[date] || 0;
+      row += `<td>${count}</td>`;
+    });
+    row += `\n</tr>`;
+    rows.push(row);
+  });
+  
+  str = `<div><table>
+            <thead>
+              <tr>
+                <th>Component</th>
+                ${headers}
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                ${rows.join('')}
+              </tr>
+            </tbody>
+          </table></div>`;
+
   return str;
 }
