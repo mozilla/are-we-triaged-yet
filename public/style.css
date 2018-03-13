@@ -103,6 +103,22 @@ table.counts {
   font-size: small
 }
 
+table.counts tr.product {
+  background-color: black;
+  color: white;
+}
+
+table.counts td {
+  width: 4%;
+  text-align: right;
+  padding-right: 1vw;
+}
+
+table.counts td:first-of-type {
+  width: 36%;
+  text-align: left;
+}
+
 thead td {
   text-align: center;
   font-size: small;
