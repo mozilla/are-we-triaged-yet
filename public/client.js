@@ -1,19 +1,23 @@
-var reportName, main
-var args;
+var reportName, main, args;
 
 document.onreadystatechange = () => {
   if (document.readyState === 'interactive') {
     main = document.querySelector('main');
     args = getArguments();
-    renderStats(args);
-    window.setInterval(renderStats, 60*1000, args);
+    if (args.counts) {
+      renderCounts(args);
+      window.setInterval(renderCounts, 60*1000, args);
+    } else { 
+      renderStats(args);
+      window.setInterval(renderStats, 60*1000, args);
+    }
   }
 };
 
 function getArguments() {
   
   var query = document.location.search;
-  var args  = { versions: 'all', reports: 'all', all: false } 
+  var args  = { versions: 'all', reports: 'all', all: false, counts: false } 
   
   query.slice(1).split('&').forEach(pair => {
     var kv = pair.split('=');
@@ -28,6 +32,9 @@ function getArguments() {
     if (kv[0] === 'all') {
       args.all = true; 
     } 
+    if (kv[0] === 'counts') {
+      args.counts = true;
+    }
   });
 
   return args;
@@ -59,14 +66,15 @@ function renderStats(args) {
   if (args.all && args.all === true) {
     all = true;
   }
+
+  // clean up 
+  main.innerHTML = '';
   
   fetch('/data')
   .then(response => {
     if(response.ok) {
       response.json()
       .then(body => {
-        // clean up 
-        main.innerHTML = '';
         if (!body.stats) {
           main.insertAdjacentHTML('beforeend', `<p>Still fetching data, will automatically reload.</p>`);
         } else {
@@ -97,6 +105,29 @@ function renderStats(args) {
           });
         }
       });
+    }
+  });
+}
+
+
+function renderCounts(args) {
+  var all;
+
+  // cleanup
+  document.body.classList.add('single-report');
+  if (args.all && args.all === true) {
+    all = true;
+  }
+  main.innerHTML = '';
+  document.querySelector('.report-name').textContent = 'New Bug Counts';
+
+  fetch('/data')
+  .then(response => {
+    if(response.ok) {
+      response.json()
+      .then(body => {
+        main.insertAdjacentHTML('beforeend', getCountTable(body.stats.bugCounts, all));
+      })
     }
   });
 }
@@ -139,5 +170,77 @@ function getTable(stats, version, report, all) {
           </tbody>
         </table></div>`;
   
+  return str;
+}
+
+function getCountTable(data, all) {
+  var str = '', headers = '', tableBody ='', total = 0;
+  
+  // headers and total bug counts
+
+  tableBody += `<tr class="total">
+                  <td>Total</td>`;
+  Object.keys(data.dates).forEach(date => { 
+    var parsed = new Date(date);
+    var count = data.dates[date] || 0;
+    headers += `<th>${parsed.getUTCMonth() + 1}-${parsed.getUTCDate()}</th>`;
+    tableBody += `<td>${count}</td>`;
+    total += count;
+  });
+  tableBody += `\n<td>${total}</td>
+                    </tr>`;
+
+  // counts for each product
+  Object.keys(data.products).forEach(product => {
+    var total = 0, rows = [];
+    tableBody += `<tr class="product">
+                    <td>${product}</td>`;
+    Object.keys(data.dates).forEach(date => {
+      var count = data.products[product].dates[date] || 0;
+      tableBody += `<td>${count}</td>`;
+      total += count;
+    });
+    tableBody += `\n<td>${total}</td>
+            </tr>`;
+
+    // counts for each component
+    Object.keys(data.products[product].components).forEach(component => {
+      var total = 0;
+      var row = `<tr class="component">
+                  <td>${component}</td>`;
+      Object.keys(data.dates).forEach(date => {
+        var count = data.products[product].components[component].dates[date] || 0;
+        row += `<td>${count}</td>`;
+        total += count;
+      });
+      row += `\n<td>${total}</td>
+              </tr>`;  
+      rows.push({html: row, total: total});
+    });
+
+    // sort components by total decending
+    rows.sort((a, b) => {
+      return b.total - a.total;
+    });
+
+    // join rows for components in this product
+    rows.forEach(row => tableBody += row.html);
+  });
+  
+  str = `<div><table class="counts">
+            <thead>
+              <tr>
+                <th>Component</th>
+                ${headers}
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                ${tableBody}
+              </tr>
+            </tbody>
+          </table></div>`;
+
   return str;
 }

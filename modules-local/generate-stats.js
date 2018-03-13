@@ -32,7 +32,7 @@ var GenerateStats = function(config) {
     Count bugs filed in last week
     */
 
-    requests.push(fetch(`https://bugzilla.mozilla.org/rest/bug?include_fields=id,creation_time,status,resolution,component,product&chfield=%5BBug%20creation%5D&chfieldfrom=-1w&chfieldto=Now&email1=intermittent-bug-filer%40mozilla.bugs&emailreporter1=1&emailtype1=notequals&f1=component&f2=bug_severity&keywords=meta&keywords_type=nowords&limit=0&o1=nowordssubstr&o2=notequals${productList}&short_desc=%5E%5C%5Bmeta%5C%5D&short_desc_type=notregexp&v1=${exclusionList}&v2=enhancement`)
+    requests.push(fetch(`https://bugzilla.mozilla.org/rest/bug?include_fields=id,creation_time,status,resolution,component,product&chfield=%5BBug%20creation%5D&chfieldfrom=-2w&chfieldto=Now&email1=intermittent-bug-filer%40mozilla.bugs&emailreporter1=1&emailtype1=notequals&f1=component&f2=bug_severity&keywords=meta&keywords_type=nowords&limit=0&o1=nowordssubstr&o2=notequals${productList}&short_desc=%5E%5C%5Bmeta%5C%5D&short_desc_type=notregexp&v1=${exclusionList}&v2=enhancement`)
         .then(response => {
             if (response.ok) {
                 response.json()
@@ -49,7 +49,10 @@ var GenerateStats = function(config) {
     function processData(data) {
         var dateString;
         var dateFiled;
-        var counts = {};
+        var counts = {
+            dates: {},
+            products: {}
+        };
         var list = [];
         
         data.bugs.forEach(bug => {
@@ -57,24 +60,43 @@ var GenerateStats = function(config) {
             dateFiled = new Date(bug.creation_time);
             dateString = [dateFiled.getUTCFullYear(), dateFiled.getUTCMonth()+1, dateFiled.getUTCDate()]
             .join('-');
-            if (counts[dateString]) {
-                counts[dateString]++;
+
+            // overall counts
+            if (counts.dates[dateString]) {
+                counts.dates[dateString] ++;
             } else {
-                counts[dateString] = 1;
+                counts.dates[dateString] = 1;
+            }
+
+            // product counts
+            if (counts.products[bug.product]) {
+                if (counts.products[bug.product].dates[dateString]) {
+                    counts.products[bug.product].dates[dateString] ++
+                } else {
+                    counts.products[bug.product].dates[dateString] = 1
+                }
+            } else {
+                counts.products[bug.product] = {};
+                counts.products[bug.product].dates = {};
+                counts.products[bug.product].components = {}
+                counts.products[bug.product].dates[dateString] = 1;
+            }
+
+            // component counts
+            if (counts.products[bug.product].components[bug.component]) {
+                if (counts.products[bug.product].components[bug.component].dates[dateString]) {
+                    counts.products[bug.product].components[bug.component].dates[dateString] ++
+                } else {
+                    counts.products[bug.product].components[bug.component].dates[dateString] = 1
+                }
+            } else {
+                counts.products[bug.product].components[bug.component] = {};
+                counts.products[bug.product].components[bug.component].dates = {};
+                counts.products[bug.product].components[bug.component].dates[dateString] = 1;
             }
         });
-        
-        // sort by dates
-        
-        Object.keys(counts).forEach(date => {
-            list.push({date: date, count: counts[date]});
-        });
-        
-        list.sort((a, b) => {
-            return (a.date - b.date);
-        });
-        
-        stats.newBugs = list;
+
+        stats.bugCounts = counts;
     }
 
     /*
