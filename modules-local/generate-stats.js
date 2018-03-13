@@ -96,17 +96,6 @@ var GenerateStats = function(config) {
             }
         });
 
-        // sort by dates
-        
-        Object.keys(counts).forEach(date => {
-            list.push({date: date, count: counts[date]});
-        });
-        
-        list.sort((a, b) => {
-            return (a.date - b.date);
-        });
-        
-        stats.newBugs = list;
         stats.bugCounts = counts;
     }
 
