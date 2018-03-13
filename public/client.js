@@ -174,25 +174,36 @@ function getTable(stats, version, report, all) {
 }
 
 function getCountTable(data, all) {
-  var str = '', rows = [], headers = '';
+  var str = '', headers = '', tableBody ='', total = 0;
   
+  // headers and total bug counts
+
+  tableBody += `<tr class="total">
+                  <td>Total</td>`;
   Object.keys(data.dates).forEach(date => { 
     var parsed = new Date(date);
-    headers += `<th>${parsed.getUTCMonth()}-${parsed.getUTCDate()}</th>`;
+    var count = data.dates[date] || 0;
+    headers += `<th>${parsed.getUTCMonth() + 1}-${parsed.getUTCDate()}</th>`;
+    tableBody += `<td>${count}</td>`;
+    total += count;
   });
+  tableBody += `\n<td>${total}</td>
+                    </tr>`;
 
+  // counts for each product
   Object.keys(data.products).forEach(product => {
-    var total = 0;
-    var row = `<tr class="product">
-                <td>${product}</td>`;
+    var total = 0, rows = [];
+    tableBody += `<tr class="product">
+                    <td>${product}</td>`;
     Object.keys(data.dates).forEach(date => {
       var count = data.products[product].dates[date] || 0;
-      row += `<td>${count}</td>`;
+      tableBody += `<td>${count}</td>`;
       total += count;
     });
-    row += `\n<td>${total}</td>
+    tableBody += `\n<td>${total}</td>
             </tr>`;
-    rows.push(row);
+
+    // counts for each component
     Object.keys(data.products[product].components).forEach(component => {
       var total = 0;
       var row = `<tr class="component">
@@ -204,8 +215,16 @@ function getCountTable(data, all) {
       });
       row += `\n<td>${total}</td>
               </tr>`;  
-      rows.push(row);
+      rows.push({html: row, total: total});
     });
+
+    // sort components by total decending
+    rows.sort((a, b) => {
+      return b.total - a.total;
+    });
+
+    // join rows for components in this product
+    rows.forEach(row => tableBody += row.html);
   });
   
   str = `<div><table class="counts">
@@ -218,7 +237,7 @@ function getCountTable(data, all) {
             </thead>
             <tbody>
               <tr>
-                ${rows.join('')}
+                ${tableBody}
               </tr>
             </tbody>
           </table></div>`;
