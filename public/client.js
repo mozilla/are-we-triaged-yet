@@ -1,5 +1,4 @@
-var reportName, main
-var args;
+var reportName, main, args;
 
 document.onreadystatechange = () => {
   if (document.readyState === 'interactive') {
@@ -205,7 +204,7 @@ function getCountTable(data, all) {
       });
       row += `\n<td>${total}</td>
               </tr>`;  
-      rows.push(row);    
+      rows.push(row);
     });
   });
   
