@@ -178,21 +178,38 @@ function getCountTable(data, all) {
   var str = '', rows = [], headers = '';
   
   Object.keys(data.dates).forEach(date => { 
-    headers += `<th>${date}</th>`;
+    var parsed = new Date(date);
+    headers += `<th>${parsed.getUTCMonth()}-${parsed.getUTCDate()}</th>`;
   });
 
   Object.keys(data.products).forEach(product => {
-    var row = `<tr>
+    var total = 0;
+    var row = `<tr class="product">
                 <td>${product}</td>`;
     Object.keys(data.dates).forEach(date => {
       var count = data.products[product].dates[date] || 0;
       row += `<td>${count}</td>`;
+      total += count;
     });
-    row += `\n</tr>`;
+    row += `\n<td>${total}</td>
+            </tr>`;
     rows.push(row);
+    Object.keys(data.products[product].components).forEach(component => {
+      var total = 0;
+      var row = `<tr class="component">
+                  <td>${component}</td>`;
+      Object.keys(data.dates).forEach(date => {
+        var count = data.products[product].components[component].dates[date] || 0;
+        row += `<td>${count}</td>`;
+        total += count;
+      });
+      row += `\n<td>${total}</td>
+              </tr>`;  
+      rows.push(row);    
+    });
   });
   
-  str = `<div><table>
+  str = `<div><table class="counts">
             <thead>
               <tr>
                 <th>Component</th>

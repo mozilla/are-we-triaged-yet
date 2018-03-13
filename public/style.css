@@ -99,6 +99,10 @@ table {
   width: 100%;
 }
 
+table.counts {
+  font-size: small
+}
+
 thead td {
   text-align: center;
   font-size: small;
