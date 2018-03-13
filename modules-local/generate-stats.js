@@ -94,31 +94,6 @@ var GenerateStats = function(config) {
                 counts.products[bug.product].components[bug.component].dates = {};
                 counts.products[bug.product].components[bug.component].dates[dateString] = 1;
             }
-/*
-            // overall counts
-            if (counts[dateString]) {
-                counts[dateString].total ++;
-            } else {
-                counts[dateString] = {};
-                counts[dateString].total = 1;
-                counts[dateString].products = {};
-            }
-            // product
-            if (counts[dateString].products[bug.product]) {
-                counts[dateString].products[bug.product].total ++;
-            } else {
-                counts[dateString].products[bug.product] = {};
-                counts[dateString].products[bug.product].total = 1;
-                counts[dateString].products[bug.product].components = {};
-            }
-
-            // product component
-            if (counts[dateString].products[bug.product].components[bug.component]) {
-                counts[dateString].products[bug.product].components[bug.component] ++
-            } else {
-                counts[dateString].products[bug.product].components[bug.component] = 1;
-            }
-*/
         });
 
         // sort by dates
