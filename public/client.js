@@ -145,7 +145,7 @@ function getTable(stats, version, report, all) {
     rows += `<tr>
               <td>${rank.component}</td>
               <td>
-                <a href="${reportFields.buglist}&product=${rank.productName}&component=${rank.componentName}">${rank.count}</a>
+                <a href="${reportFields.buglist}&amp;product=${encodeURIComponent(rank.productName)}&amp;component=${encodeURIComponent(rank.componentName)}">${rank.count}</a>
               </td>
             </tr>`;
   });
