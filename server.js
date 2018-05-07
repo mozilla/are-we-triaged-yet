@@ -8,8 +8,8 @@ const config = {
              'NSPR', 'NSS', 'Toolkit'],
   exclude: ['build conf', 'ca cert'], // components to exclude, can be partial strings
   versions: [
-    {number: 60, mergedate: '2018-01-22', betadate: '2018-03-12'},
-    {number: 61, mergedate: '2018-03-12', betadate: '2018-05-07'}
+    {number: 61, mergedate: '2017-03-12', betadate: '2018-05-07'},
+    {number: 62, mergedate: '2018-05-07', betadate: '2018-06-26'}
   ]
 };
 var   data = {stats: false, message: 'not ready, please refetch'};
