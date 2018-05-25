@@ -2,6 +2,7 @@
 
 const express = require('express');
 const GenerateStats = require('./modules-local/generate-stats');
+var   schedule = require('node-schedule');
 const config = {
   products: ['Core', 'External Software Affecting Firefox',
              'Firefox', 'Firefox for iOS', 'Firefox for Android',
@@ -14,7 +15,6 @@ const config = {
   ]
 };
 var   data = {stats: false, message: 'not ready, please refetch'};
-const hourly = 60*60*1000;
 
 // Method to periodically run to generate stats
 
@@ -23,11 +23,16 @@ function update() {
 
   myStats.then(stats => {
     console.log(stats.report);
-    data = {stats: stats, message: 'ok'};
+    data = { message: 'ok', nextUpdate: j.nextInvocation(), lastUpdate: new Date(), stats: stats};
   });
 }
 
-var timeout = setInterval(update, hourly);
+// update at midnight
+var rule = new schedule.RecurrenceRule();
+rule.hour = 0;
+rule.minute = 0;
+
+var j = schedule.scheduleJob(rule, update);
 
 // get first set of data
 update();
