@@ -39,6 +39,7 @@ function custom_search(strings, ...computed) {
         // Operators
         '==': query => ({ ...query, o: "equals", state: s_value }),
         '!=': query => ({ ...query, o: "notequals", state: s_value }),
+        '<=': query => ({ ...query, o: "lessthaneq", state: s_value }),
         '>=': query => ({ ...query, o: "greaterthaneq", state: s_value }),
         'any-words': query => ({ ...query, o: "anywords", state: s_value }),
         'any-words-substr': query => ({ ...query, o: "anywordssubstr", state: s_value }),
@@ -294,9 +295,9 @@ var GenerateStats = function(config) {
                  short_desc not-regexp %5E%5C%5Bmeta
                  ANY(
                    ${"cf_status_" + versionStr} == affected
-                   ANY(
-                     ${"cf_status_" + versionStr} any-words ---%2C%3F
-                     creation_ts >= ${mergedate}
+                   ALL(
+                     ${"cf_status_" + versionStr} is-empty
+                     creation_ts <= ${betadate}
                    )
                  )
                  component no-words-substr ${exclusionList}
@@ -314,9 +315,9 @@ var GenerateStats = function(config) {
                  short_desc not-regexp %5E%5C%5Bmeta
                  ANY(
                    ${"cf_status_" + versionStr} == affected
-                   ANY(
-                     ${"cf_status_" + versionStr} any-words ---%2C%3F
-                     creation_ts >= ${mergedate}
+                   ALL(
+                     ${"cf_status_" + versionStr} is-empty
+                     creation_ts <= ${betadate}
                    )
                  )
                  component no-words-substr ${exclusionList}
