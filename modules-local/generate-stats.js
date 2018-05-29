@@ -4,8 +4,9 @@ const fetch = require('node-fetch');
 const isArray = require('util').isArray;
 
 var GenerateStats = function(config) {
-
-    var stats = {versions: {}};
+    var stats = {
+      versions:   {}
+    };
     var requests = [];
     var versions, productList = '', exclusionList = 'none';
 
