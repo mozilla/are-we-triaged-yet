@@ -3,6 +3,125 @@
 const fetch = require('node-fetch');
 const isArray = require('util').isArray;
 
+// Generate custom searches URL in a much more readable way.
+function custom_search(strings, ...computed) {
+    // state of the synthesizer state machines.
+    const s_new_line = "new_line";
+    const s_new_expr = "new_expr";
+    const s_operator = "operator";
+    const s_value = "value";
+    // Convert accumulated state into url fields.
+    function line(q) {
+        var num = q.num;
+        if (q.fn) {
+            q.url[q.fn] = q.v;
+        } else if (q.up) {
+            q.urlPrefix += q.v;
+        } else if (q.ua) {
+            q.urlSuffix += q.v;
+        } else if (q.n || q.f || q.o || q.v || q.j) {
+            q.num += 1;
+            if (q.n) q.url["n" + num] = q.n;
+            if (q.f) q.url["f" + num] = q.f;
+            if (q.o) q.url["o" + num] = q.o;
+            if (q.v) q.url["v" + num] = q.v;
+            if (q.j) q.url["j" + num] = q.j;
+        }
+        return { num: q.num, urlPrefix: q.urlPrefix, urlSuffix: q.urlSuffix, url: q.url, state: s_new_line };
+    }
+    // Synthesized the url based on read token. Move the state of the state
+    // machine based on read tokens.
+    var synth = {
+        '!': query => ({ ...query, n: "1", state: s_new_expr }),
+        'ALL(': query => line({ ...query, f: "OP"}),
+        'ANY(': query => line({ ...query, f: "OP", j: "OR" }),
+        ')': query => line({ ...query, f: "CP"}),
+        // Operators
+        '==': query => ({ ...query, o: "equals", state: s_value }),
+        '!=': query => ({ ...query, o: "notequals", state: s_value }),
+        '<=': query => ({ ...query, o: "lessthaneq", state: s_value }),
+        '>=': query => ({ ...query, o: "greaterthaneq", state: s_value }),
+        'any-words': query => ({ ...query, o: "anywords", state: s_value }),
+        'any-words-substr': query => ({ ...query, o: "anywordssubstr", state: s_value }),
+        'no-words-substr': query => ({ ...query, o: "nowordssubstr", state: s_value }),
+        'not-regexp': query => ({ ...query, o: "notregexp", state: s_value }),
+        'not-substring': query => ({ ...query, o: "notsubstring", state: s_value }),
+        'is-empty': query => line({ ...query, o: "isempty", state: s_new_line }),
+        // Special fields
+        'include_fields': (query, input) => ({ ...query, fn: input, state: s_value }),
+        'changed_field': query => ({ ...query, fn: "chfield", state: s_value }),
+        'changed_field_from': query => ({ ...query, fn: "chfieldfrom", state: s_value }),
+        'changed_field_to': query => ({ ...query, fn: "chfieldto", state: s_value }),
+        'changed_field_value': query => ({ ...query, fn: "chfieldvalue", state: s_value }),
+        'limit': (query, input) => ({ ...query, fn: input, state: s_value }),
+        'short_desc_field': query => ({ ...query, fn: "short_desc", state: s_value }),
+        'short_desc_type': (query, input) => ({ ...query, fn: input, state: s_value }),
+        'resolution': (query, input) => ({ ...query, fn: input, state: s_value }),
+        'priority': (query, input) => ({ ...query, fn: input, state: s_value }),
+        'order': (query, input) => ({ ...query, fn: input, state: s_value }),
+        'query_format': (query, input) => ({ ...query, fn: input, state: s_value }),
+        'email1': (query, input) => ({ ...query, fn: input, state: s_value }),
+        'emailreporter1': (query, input) => ({ ...query, fn: input, state: s_value }),
+        'emailtype1': (query, input) => ({ ...query, fn: input, state: s_value }),
+        'keywords': (query, input) => ({ ...query, fn: input, state: s_value }),
+        'keywords_type': (query, input) => ({ ...query, fn: input, state: s_value }),
+        // Custom commands to use a single mechanism
+        'bugzilla_url': query => ({ ...query, up: true, state: s_value }),
+        'bugzilla_url_append': query => ({ ...query, ua: true, state: s_value }),
+        // special custom search fields
+        'attachments.ispatch': (query, input) => line({ ...query, f: input }),
+        // Non-matched tokens
+        __not_found__: (query, input) => {
+            switch (query.state) {
+            case s_new_expr:
+            case s_new_line: return { ...query, f: input, state: s_operator };
+            case s_value: return line({ ...query, v: input });
+            }
+            throw new Error(`custom_search parser: unexpected input: ${input} with state ${query.state} in
+${strings.join(" ")}
+            `);
+        }
+    };
+    // Simple iterator which iterates over all tokens, separated by spaces.
+    var string_separator = /\s+/;
+    function* tokens() {
+        var is = strings[Symbol.iterator]();
+        var ic = computed[Symbol.iterator]();
+        var vc = ic.next();
+        while (!vc.done) {
+            var vs = is.next();
+            vs = vs.value.trim();
+            if (vs)
+                yield* vs.split(string_separator);
+            yield vc.value;
+            vc = ic.next();
+        }
+        yield* is.next().value.trim().split(string_separator);
+    }
+    // Iterate over the list of tokens (space separated strings) and
+    // accumulate url fields.
+    var query = { num: 1, urlPrefix: "", urlSuffix: "", url: {}, state: s_new_line };
+    for (let tok of tokens()) {
+        if (tok in synth)
+            query = synth[tok](query, tok);
+        else
+            query = synth.__not_found__(query, tok);
+    }
+    // Convert url fields into a string which can be appended to a bugzilla
+    // search query.
+    var url = "";
+    for (let k in query.url) {
+        if (url)
+            url += `&${k}=${query.url[k]}`;
+        else
+            url = `?${k}=${query.url[k]}`;
+    }
+    url = query.urlPrefix + url + query.urlSuffix;
+    // If one of the category is not being displayed, try the url printed by this command.
+    // console.log(url);
+    return url;
+}
+
 var GenerateStats = function(config) {
     var stats = {
       versions:   {}
@@ -33,7 +152,24 @@ var GenerateStats = function(config) {
     Count bugs filed in last week
     */
 
-    requests.push(fetch(`https://bugzilla.mozilla.org/rest/bug?include_fields=id,creation_time,status,resolution,component,product&chfield=%5BBug%20creation%5D&chfieldfrom=-2w&chfieldto=Now&email1=intermittent-bug-filer%40mozilla.bugs&emailreporter1=1&emailtype1=notequals&f1=component&f2=bug_severity&keywords=meta&keywords_type=nowords&limit=0&o1=nowordssubstr&o2=notequals${productList}&short_desc=%5E%5C%5Bmeta%5C%5D&short_desc_type=notregexp&v1=${exclusionList}&v2=enhancement`)
+    requests.push(fetch(custom_search`
+      bugzilla_url https://bugzilla.mozilla.org/rest/bug
+      bugzilla_url_append ${productList}
+        include_fields id,creation_time,status,resolution,component,product
+        limit 0
+        keywords meta
+        keywords_type nowords
+        short_desc_field %5E%5C%5Bmeta%5C%5D short_desc_type notregexp
+        changed_field %5BBug%20creation%5D
+          changed_field_from -2w changed_field_to Now
+
+        email1 intermittent-bug-filer%40mozilla.bugs
+        emailreporter1 1
+        emailtype1 notequals
+
+        component no-words-substr ${exclusionList}
+        bug_severity != enhancement
+    `)
         .then(response => {
             if (response.ok) {
                 response.json()
@@ -104,18 +240,133 @@ var GenerateStats = function(config) {
     Count categories
     */
 
+
     versions.forEach(version => {
 
         var mergedate  = version.mergedate;
         var betadate   = version.betadate;
         var versionStr = 'firefox' + version.number;
         var queries    = [
-          {name: 'untriaged', title: 'Pending untriaged', url: `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component&chfield=%5BBug%20creation%5D&chfieldfrom=${mergedate}&chfieldto=Now&f2=cf_status_${versionStr}&f3=bug_severity&f4=short_desc&f5=component&limit=0&o2=anywords&o3=notequals&o4=notsubstring&o5=nowordssubstr&priority=--${productList}&resolution=---&short_desc=%5E%5C%5Bmeta&short_desc_type=notregexp&v2=%3F%2C---&v3=enhancement&v4=%5Bmeta%5D&v5=${exclusionList}`, buglist: `https://bugzilla.mozilla.org/buglist.cgi?chfield=%5BBug%20creation%5D&chfieldfrom=${mergedate}&chfieldto=Now&f2=cf_status_${versionStr}&f3=bug_severity&f4=short_desc&f5=component&o2=anywords&o3=notequals&o4=notsubstring&o5=nowordssubstr&priority=--&resolution=---&short_desc=%5E%5C%5Bmeta&short_desc_type=notregexp&v2=%3F%2C---&v3=enhancement&v4=%5Bmeta%5D&v5=${exclusionList}&order=bug_id&limit=0`},
-          {name: 'affecting', title:'P1 affecting or may affect', url: `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component&f1=bug_severity&f10=CP&f11=component&f2=short_desc&f3=OP&f4=cf_status_${versionStr}&f5=OP&f6=cf_status_${versionStr}&f7=creation_ts&f8=CP&j3=OR&j5=OR&limit=0&o1=notequals&o11=nowordssubstr&o2=notregexp&o4=equals&o6=anywords&o7=greaterthaneq&priority=P1&${productList}&resolution=---&v1=enhancement&v11=${exclusionList}&v2=%5E%5C%5Bmeta&v4=affected&v6=---%2C%3F&v7=${mergedate}`, buglist: `https://bugzilla.mozilla.org/buglist.cgi?f1=bug_severity&f10=CP&f11=component&f2=short_desc&f3=OP&f4=cf_status_${versionStr}&f5=OP&f6=cf_status_${versionStr}&f7=creation_ts&f8=CP&j3=OR&j5=OR&o1=notequals&o11=nowordssubstr&o2=notregexp&o4=equals&o6=anywords&o7=greaterthaneq&priority=P1&resolution=---&v1=enhancement&v11=${exclusionList}&v2=%5E%5C%5Bmeta&v4=affected&v6=---%2C%3F&v7=${mergedate}&order=bug_id&limit=0`},
-          {name: 'uplifted', title: 'Uplifted', url: 
-          `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component&chfield=cf_status_${versionStr}&chfieldfrom=${betadate}&chfieldto=Now&chfieldvalue=fixed&f2=flagtypes.name&f5=attachments.ispatch&o2=equals&v2=approval-mozilla-beta%2B`, buglist: 
-          `https://bugzilla.mozilla.org/buglist.cgi?o2=equals&chfieldto=Now&query_format=advanced&chfield=cf_status_${versionStr}&chfieldfrom=${betadate}&f2=flagtypes.name&chfieldvalue=fixed&f5=attachments.ispatch&v2=approval-mozilla-beta%2B`, showAll: true},
-          {name: 'fix_or_defer', title: 'Fix or defer', url: `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component&f1=component&f2=cf_status_${versionStr}&n1=1&o1=anywordssubstr&o2=equals&priority=P1${productList}&resolution=---&v1=${exclusionList}&v2=affected`, buglist: `https://bugzilla.mozilla.org/buglist.cgi?priority=P1&f1=component&o1=anywordssubstr&resolution=---&o2=equals&n1=1&query_format=advanced&f2=cf_status_${versionStr}&v1=${exclusionList}&v2=affected`}
+            {name: 'untriaged', title: 'Pending untriaged',
+             url: custom_search`
+               bugzilla_url https://bugzilla.mozilla.org/rest/bug
+               bugzilla_url_append ${productList}
+                 limit 0
+                 include_fields id,summary,status,product,component
+                 changed_field %5BBug%20creation%5D
+                   changed_field_from ${mergedate} changed_field_to Now
+                 resolution ---
+                 priority --
+                 short_desc_field %5E%5C%5Bmeta short_desc_type notregexp
+
+                 ${"cf_status_" + versionStr} any-words %3F%2C---
+                 bug_severity != enhancement
+                 short_desc not-substring %5Bmeta%5D
+                 component no-words-substr ${exclusionList}
+             `,
+             buglist: custom_search`
+               bugzilla_url https://bugzilla.mozilla.org/buglist.cgi
+               bugzilla_url_append ${productList}
+                 limit 0
+                 changed_field %5BBug%20creation%5D
+                   changed_field_from ${mergedate} changed_field_to Now
+                 resolution ---
+                 priority --
+                 short_desc_field %5E%5C%5Bmeta short_desc_type notregexp
+                 order bug_id
+
+                 ${"cf_status_" + versionStr} any-words %3F%2C---
+                 bug_severity != enhancement
+                 short_desc not-substring %5Bmeta%5D
+                 component no-words-substr ${exclusionList}
+             `
+             },
+
+            {name: 'affecting', title:'P1 affecting or may affect',
+             url: custom_search`
+               bugzilla_url https://bugzilla.mozilla.org/rest/bug
+               bugzilla_url_append ${productList}
+                 limit 0
+                 include_fields id,summary,status,product,component
+                 resolution ---
+                 priority P1
+                 short_desc_field %5E%5C%5Bmeta short_desc_type notregexp
+
+                 bug_severity != enhancement
+                 short_desc not-regexp %5E%5C%5Bmeta
+                 ANY(
+                   ${"cf_status_" + versionStr} == affected
+                   ALL(
+                     ${"cf_status_" + versionStr} is-empty
+                     creation_ts <= ${betadate}
+                   )
+                 )
+                 component no-words-substr ${exclusionList}
+             `,
+             buglist: custom_search`
+               bugzilla_url https://bugzilla.mozilla.org/buglist.cgi
+               bugzilla_url_append ${productList}
+                 limit 0
+                 resolution ---
+                 priority P1
+                 short_desc_field %5E%5C%5Bmeta short_desc_type notregexp
+                 order bug_id
+
+                 bug_severity != enhancement
+                 short_desc not-regexp %5E%5C%5Bmeta
+                 ANY(
+                   ${"cf_status_" + versionStr} == affected
+                   ALL(
+                     ${"cf_status_" + versionStr} is-empty
+                     creation_ts <= ${betadate}
+                   )
+                 )
+                 component no-words-substr ${exclusionList}
+            `
+            },
+
+            {name: 'uplifted', title: 'Uplifted',
+             url: custom_search`
+               bugzilla_url https://bugzilla.mozilla.org/rest/bug
+                 include_fields id,summary,status,product,component
+                 changed_field ${"cf_status_" + versionStr} changed_field_value fixed
+                   changed_field_from ${betadate} changed_field_to Now
+
+                 flagtypes.name == approval-mozilla-beta%2B
+                 attachments.ispatch
+             `,
+             buglist: custom_search`
+               bugzilla_url https://bugzilla.mozilla.org/buglist.cgi
+                 query_format advanced
+                 changed_field ${"cf_status_" + versionStr} changed_field_value fixed
+                   changed_field_from ${betadate} changed_field_to Now
+
+                 flagtypes.name == approval-mozilla-beta%2B
+                 attachments.ispatch
+             `,
+             showAll: true},
+
+            {name: 'fix_or_defer', title: 'Fix or defer',
+             url: custom_search`
+               bugzilla_url https://bugzilla.mozilla.org/rest/bug
+               bugzilla_url_append ${productList}
+                 include_fields id,summary,status,product,component
+                 resolution ---
+                 priority P1
+
+                 ! component any-words-substr ${exclusionList}
+                 ${"cf_status_" + versionStr} == affected
+             `,
+             buglist: custom_search`
+               bugzilla_url https://bugzilla.mozilla.org/buglist.cgi
+                 query_format advanced
+                 resolution ---
+                 priority P1
+
+                 ! component any-words-substr ${exclusionList}
+                 ${"cf_status_" + versionStr} == affected
+             `
+            }
         ];
  
         stats.versions[version.number] = {};
