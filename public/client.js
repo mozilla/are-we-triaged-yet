@@ -57,6 +57,11 @@ function getArgument(name, args, data) {
   return response;
 }
 
+function renderTimestamp(data) {
+  var timeStamp = document.querySelector('.last-updated');
+  timeStamp.innerText = new Date(data).toLocaleString();
+}
+
 function renderStats(args) {
   var versions;
   var reportNames;
@@ -80,6 +85,8 @@ function renderStats(args) {
         } else {
           versions = getArgument('versions', args, body.stats.versions);
           reportNames = getArgument('reports', args, body.stats.versions[versions[0]]);
+          
+          renderTimestamp(body.lastUpdate);
 
           // hack to fix page grid when we display one report
           if (reportNames.length === 1) {
@@ -126,6 +133,7 @@ function renderCounts(args) {
     if(response.ok) {
       response.json()
       .then(body => {
+        renderTimestamp(body.lastUpdate);
         main.insertAdjacentHTML('beforeend', getCountTable(body.stats.bugCounts, all));
       })
     }
