@@ -126,10 +126,7 @@ var GenerateStats = function(config) {
                     if (response.ok)
                     response.json()
                     .then(data => {
-                        var buglistAll, ranks;
-                      
-                        ranks = rankComponents(data.bugs);
-                      
+                        var buglistAll;
                         if (query.showAll && query.showAll === true) {
                             buglistAll = query.buglist;
                         } else {
@@ -140,7 +137,7 @@ var GenerateStats = function(config) {
                             buglist: query.buglist,
                             buglistAll: buglistAll,
                             count: data.bugs.length,
-                            ranks: ranks
+                            ranks: rankComponents(data.bugs)
                         };
                     })
                 })
