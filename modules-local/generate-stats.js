@@ -110,7 +110,7 @@ var GenerateStats = function(config) {
         var betadate   = version.betadate;
         var versionStr = 'firefox' + version.number;
         var queries    = [
-          {name: 'untriaged', title: 'Pending untriaged', url: `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component&chfield=%5BBug%20creation%5D&chfieldfrom=${mergedate}&chfieldto=Now&f2=cf_status_${versionStr}&f3=bug_severity&f4=short_desc&f5=component&limit=0&o2=anywords&o3=notequals&o4=notsubstring&o5=nowordssubstr&priority=--${productList}&resolution=---&short_desc=%5E%5C%5Bmeta&short_desc_type=notregexp&v2=%3F%2C---&v3=enhancement&v4=%5Bmeta%5D&v5=${exclusionList}`, buglist: `https://bugzilla.mozilla.org/buglist.cgi?chfield=%5BBug%20creation%5D&chfieldfrom=${mergedate}&chfieldto=Now&f2=cf_status_${versionStr}&f3=bug_severity&f4=short_desc&f5=component&o2=anywords&o3=notequals&o4=notsubstring&o5=nowordssubstr&priority=--&resolution=---&short_desc=%5E%5C%5Bmeta&short_desc_type=notregexp&v2=%3F%2C---&v3=enhancement&v4=%5Bmeta%5D&v5=${exclusionList}&order=bug_id&limit=0`},
+          {name: 'untriaged', title: 'Pending untriaged', url: `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component&chfield=%5BBug%20creation%5D&chfieldfrom=${mergedate}&chfieldto=Now&f2=cf_status_${versionStr}&f3=bug_severity&f4=short_desc&f5=component&limit=0&o2=anywords&o3=notequals&o4=notsubstring&o5=nowordssubstr&priority=--${productList}&resolution=---&short_desc=%5E%5C%5Bmeta&short_desc_type=notregexp&v2=%3F%2C---%2Caffected&v3=enhancement&v4=%5Bmeta%5D&v5=${exclusionList}`, buglist: `https://bugzilla.mozilla.org/buglist.cgi?chfield=%5BBug%20creation%5D&chfieldfrom=${mergedate}&chfieldto=Now&f2=cf_status_${versionStr}&f3=bug_severity&f4=short_desc&f5=component&o2=anywords&o3=notequals&o4=notsubstring&o5=nowordssubstr&priority=--&resolution=---&short_desc=%5E%5C%5Bmeta&short_desc_type=notregexp&v2=%3F%2C---%2Caffected&v3=enhancement&v4=%5Bmeta%5D&v5=${exclusionList}&order=bug_id&limit=0`},
           {name: 'affecting', title:'P1 affecting or may affect', url: `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component&f1=bug_severity&f10=CP&f11=component&f2=short_desc&f3=OP&f4=cf_status_${versionStr}&f5=OP&f6=cf_status_${versionStr}&f7=creation_ts&f8=CP&j3=OR&j5=OR&limit=0&o1=notequals&o11=nowordssubstr&o2=notregexp&o4=equals&o6=anywords&o7=greaterthaneq&priority=P1&${productList}&resolution=---&v1=enhancement&v11=${exclusionList}&v2=%5E%5C%5Bmeta&v4=affected&v6=---%2C%3F&v7=${mergedate}`, buglist: `https://bugzilla.mozilla.org/buglist.cgi?f1=bug_severity&f10=CP&f11=component&f2=short_desc&f3=OP&f4=cf_status_${versionStr}&f5=OP&f6=cf_status_${versionStr}&f7=creation_ts&f8=CP&j3=OR&j5=OR&o1=notequals&o11=nowordssubstr&o2=notregexp&o4=equals&o6=anywords&o7=greaterthaneq&priority=P1&resolution=---&v1=enhancement&v11=${exclusionList}&v2=%5E%5C%5Bmeta&v4=affected&v6=---%2C%3F&v7=${mergedate}&order=bug_id&limit=0`},
           {name: 'uplifted', title: 'Uplifted', url: 
           `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component&chfield=cf_status_${versionStr}&chfieldfrom=${betadate}&chfieldto=Now&chfieldvalue=fixed&f2=flagtypes.name&f5=attachments.ispatch&o2=equals&v2=approval-mozilla-beta%2B`, buglist: 
@@ -126,7 +126,10 @@ var GenerateStats = function(config) {
                     if (response.ok)
                     response.json()
                     .then(data => {
-                        var buglistAll;
+                        var buglistAll, ranks;
+                      
+                        ranks = rankComponents(data.bugs);
+                      
                         if (query.showAll && query.showAll === true) {
                             buglistAll = query.buglist;
                         } else {
@@ -137,7 +140,7 @@ var GenerateStats = function(config) {
                             buglist: query.buglist,
                             buglistAll: buglistAll,
                             count: data.bugs.length,
-                            ranks: rankComponents(data.bugs)
+                            ranks: ranks
                         };
                     })
                 })
