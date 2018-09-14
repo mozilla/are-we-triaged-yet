@@ -121,7 +121,7 @@ table.counts td:first-of-type {
 
 thead td {
   text-align: center;
-  font-size: 25%;
+  font-size: 75%;
 }
 
 thead tr:last-of-type td {
@@ -133,6 +133,12 @@ tbody td {
   text-align: right;
   padding-left: 1vw;
   padding-right: 1vw;
+}
+
+tbody td:first-of-type {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 tbody tr:nth-of-type(2n) {
