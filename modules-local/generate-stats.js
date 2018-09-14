@@ -1,6 +1,7 @@
 'use strict';
 
 const fetch = require('node-fetch');
+const moment = require('moment');
 const isArray = require('util').isArray;
 
 var GenerateStats = function(config) {
@@ -110,12 +111,12 @@ var GenerateStats = function(config) {
         var betadate   = version.betadate;
         var versionStr = 'firefox' + version.number;
         var queries    = [
-          {name: 'untriaged', title: 'Pending untriaged', url: `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component&chfield=%5BBug%20creation%5D&chfieldfrom=${mergedate}&chfieldto=Now&f2=cf_status_${versionStr}&f3=bug_severity&f4=short_desc&f5=component&f6=keywords&limit=0&o2=anyexact&o3=notequals&o4=notsubstring&o5=nowordssubstr&o6=notequals&priority=--${productList}&resolution=---&short_desc=%5E%5C%5Bmeta&short_desc_type=notregexp&v2=%3F%2C---%2Caffected&v3=enhancement&v4=%5Bmeta%5D&v5=${exclusionList}&v6=stalled`, buglist: `https://bugzilla.mozilla.org/buglist.cgi?chfield=%5BBug%20creation%5D&chfieldfrom=${mergedate}&chfieldto=Now&f2=cf_status_${versionStr}&f3=bug_severity&f4=short_desc&f5=component&f6=keywords&o2=anyexact&o3=notequals&o4=notsubstring&o5=nowordssubstr&o6=notequals&priority=--&resolution=---&short_desc=%5E%5C%5Bmeta&short_desc_type=notregexp&v2=%3F%2C---%2Caffected&v3=enhancement&v4=%5Bmeta%5D&v5=${exclusionList}&v6=stalled&order=bug_id&limit=0`},
-          {name: 'affecting', title:'P1 affecting or may affect', url: `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component&f1=bug_severity&f10=CP&f11=component&f2=short_desc&f3=OP&f4=cf_status_${versionStr}&f5=OP&f6=cf_status_${versionStr}&f7=creation_ts&f8=CP&j3=OR&j5=OR&limit=0&o1=notequals&o11=nowordssubstr&o2=notregexp&o4=equals&o6=anywords&o7=greaterthaneq&priority=P1&${productList}&resolution=---&v1=enhancement&v11=${exclusionList}&v2=%5E%5C%5Bmeta&v4=affected&v6=---%2C%3F&v7=${mergedate}`, buglist: `https://bugzilla.mozilla.org/buglist.cgi?f1=bug_severity&f10=CP&f11=component&f2=short_desc&f3=OP&f4=cf_status_${versionStr}&f5=OP&f6=cf_status_${versionStr}&f7=creation_ts&f8=CP&j3=OR&j5=OR&o1=notequals&o11=nowordssubstr&o2=notregexp&o4=equals&o6=anywords&o7=greaterthaneq&priority=P1&resolution=---&v1=enhancement&v11=${exclusionList}&v2=%5E%5C%5Bmeta&v4=affected&v6=---%2C%3F&v7=${mergedate}&order=bug_id&limit=0`},
+          {name: 'untriaged', title: 'Pending untriaged', url: `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component,creation_time,keywords&chfield=%5BBug%20creation%5D&chfieldfrom=${mergedate}&chfieldto=Now&f2=cf_status_${versionStr}&f3=bug_severity&f4=short_desc&f5=component&f6=keywords&limit=0&o2=anyexact&o3=notequals&o4=notsubstring&o5=nowordssubstr&o6=notequals&priority=--${productList}&resolution=---&short_desc=%5E%5C%5Bmeta&short_desc_type=notregexp&v2=%3F%2C---%2Caffected&v3=enhancement&v4=%5Bmeta%5D&v5=${exclusionList}&v6=stalled`, buglist: `https://bugzilla.mozilla.org/buglist.cgi?chfield=%5BBug%20creation%5D&chfieldfrom=${mergedate}&chfieldto=Now&f2=cf_status_${versionStr}&f3=bug_severity&f4=short_desc&f5=component&f6=keywords&o2=anyexact&o3=notequals&o4=notsubstring&o5=nowordssubstr&o6=notequals&priority=--&resolution=---&short_desc=%5E%5C%5Bmeta&short_desc_type=notregexp&v2=%3F%2C---%2Caffected&v3=enhancement&v4=%5Bmeta%5D&v5=${exclusionList}&v6=stalled&order=bug_id&limit=0`},
+          {name: 'affecting', title:'P1 affecting or may affect', url: `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component,creation_time,keywords&f1=bug_severity&f10=CP&f11=component&f2=short_desc&f3=OP&f4=cf_status_${versionStr}&f5=OP&f6=cf_status_${versionStr}&f7=creation_ts&f8=CP&j3=OR&j5=OR&limit=0&o1=notequals&o11=nowordssubstr&o2=notregexp&o4=equals&o6=anywords&o7=greaterthaneq&priority=P1&${productList}&resolution=---&v1=enhancement&v11=${exclusionList}&v2=%5E%5C%5Bmeta&v4=affected&v6=---%2C%3F&v7=${mergedate}`, buglist: `https://bugzilla.mozilla.org/buglist.cgi?f1=bug_severity&f10=CP&f11=component&f2=short_desc&f3=OP&f4=cf_status_${versionStr}&f5=OP&f6=cf_status_${versionStr}&f7=creation_ts&f8=CP&j3=OR&j5=OR&o1=notequals&o11=nowordssubstr&o2=notregexp&o4=equals&o6=anywords&o7=greaterthaneq&priority=P1&resolution=---&v1=enhancement&v11=${exclusionList}&v2=%5E%5C%5Bmeta&v4=affected&v6=---%2C%3F&v7=${mergedate}&order=bug_id&limit=0`},
           {name: 'uplifted', title: 'Uplifted', url: 
-          `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component&chfield=cf_status_${versionStr}&chfieldfrom=${betadate}&chfieldto=Now&chfieldvalue=fixed&f2=flagtypes.name&f5=attachments.ispatch&o2=equals&v2=approval-mozilla-beta%2B`, buglist: 
+          `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component,creation_time,keywords&chfield=cf_status_${versionStr}&chfieldfrom=${betadate}&chfieldto=Now&chfieldvalue=fixed&f2=flagtypes.name&f5=attachments.ispatch&o2=equals&v2=approval-mozilla-beta%2B`, buglist: 
           `https://bugzilla.mozilla.org/buglist.cgi?o2=equals&chfieldto=Now&query_format=advanced&chfield=cf_status_${versionStr}&chfieldfrom=${betadate}&f2=flagtypes.name&chfieldvalue=fixed&f5=attachments.ispatch&v2=approval-mozilla-beta%2B`, showAll: true},
-          {name: 'fix_or_defer', title: 'Fix or defer', url: `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component&f1=component&f2=cf_status_${versionStr}&n1=1&o1=anywordssubstr&o2=equals&priority=P1${productList}&resolution=---&v1=${exclusionList}&v2=affected`, buglist: `https://bugzilla.mozilla.org/buglist.cgi?priority=P1&f1=component&o1=anywordssubstr&resolution=---&o2=equals&n1=1&query_format=advanced&f2=cf_status_${versionStr}&v1=${exclusionList}&v2=affected`}
+          {name: 'fix_or_defer', title: 'Fix or defer', url: `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component,creation_time,keywords&f1=component&f2=cf_status_${versionStr}&n1=1&o1=anywordssubstr&o2=equals&priority=P1${productList}&resolution=---&v1=${exclusionList}&v2=affected`, buglist: `https://bugzilla.mozilla.org/buglist.cgi?priority=P1&f1=component&o1=anywordssubstr&resolution=---&o2=equals&n1=1&query_format=advanced&f2=cf_status_${versionStr}&v1=${exclusionList}&v2=affected`}
         ];
  
         stats.versions[version.number] = {};
@@ -151,23 +152,63 @@ var GenerateStats = function(config) {
     function rankComponents(bugs) {
         var buckets = {};
         var ranks = [];
+        var now = moment.utc();
+      
         bugs.forEach(bug => {
             // count components
+            
             var component = bug.product + "::" + bug.component;
-            if (buckets[component]) {
-                buckets[component]++;
+            
+            // get age group
+            var creation = new moment(bug.creation_time);
+            var age = moment.duration(now.diff(creation)).asWeeks();          
+            var group;
+          
+            if (age <= 1) {
+              group = 'lte_week';
+            } else if (age <= 4) {
+              group = 'lte_month';
             } else {
-                buckets[component] = 1;
+              group = 'gt_month';
             }
+          
+            if (!buckets[component]) {
+              buckets[component] = {}; 
+            }
+          
+            if (buckets[component].all) {
+              buckets[component].all.count ++;
+              buckets[component].all.bugs.push(bug.id);
+            } else {
+              buckets[component].all = {
+                count: 1,
+                bugs: [bug.id]
+              };
+            }
+          
+            if (buckets[component][group]) {
+              buckets[component][group].count ++; 
+              buckets[component][group].bugs.push(bug.id);
+            } else {
+              buckets[component][group] = {
+                count: 1,
+                bugs: [bug.id]
+              };
+            }
+          
         });
         
-        // sort by components
+        // sort by totals
         
         Object.keys(buckets).forEach(component => {
             var componentName = component.split('\:\:');
             ranks.push({
                 productName: componentName[0], componentName: componentName[1],
-                component: component, count: buckets[component]
+                component: component, 
+                all: buckets[component].all,
+                lte_week: buckets[component].lte_week || { count: 0, bugs: [] },
+                lte_month: buckets[component].lte_month || { count: 0, bugs: [] },
+                gt_month: buckets[component].gt_month || { count: 0, bugs: [] }
             });
         });
         

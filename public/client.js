@@ -148,12 +148,21 @@ function getTable(stats, version, report, all) {
   var avg = (numComponents > 0) ? Math.floor(reportFields.count/numComponents) : 0;
   // if we don't show all, show top ten
   var reportData = all ? reportFields.ranks : reportFields.ranks.slice(0, 10);
-
+  
   reportData.forEach(rank => {
     rows += `<tr>
               <td>${rank.component}</td>
               <td>
-                <a href="${reportFields.buglist}&amp;product=${encodeURIComponent(rank.productName)}&amp;component=${encodeURIComponent(rank.componentName)}">${rank.count}</a>
+                ${rank.gt_month.count || 0}
+              </td>
+              <td>
+                ${rank.lte_month.count || 0}
+              </td>
+              <td>
+                ${rank.lte_week.count || 0}
+              </td>
+              <td>
+                <a href="${reportFields.buglist}&amp;product=${encodeURIComponent(rank.productName)}&amp;component=${encodeURIComponent(rank.componentName)}">${rank.all.count}</a>
               </td>
             </tr>`;
   });
@@ -161,16 +170,23 @@ function getTable(stats, version, report, all) {
   str = `<div><table>
           <thead>
             <tr>
-              <th colspan="2">Firefox <span class="versionNumber">${version}</span></th>
+              <th colspan="5">Firefox <span class="versionNumber">${version}</span></th>
             </tr>
             <tr>
-              <td colspan="2">
+              <td colspan="5">
                 <ul>
                   <li>All components: <a href="${reportFields.buglistAll}">${reportFields.count}</a> bugs</li>
                   <li>Components with bugs: ${numComponents}</li>
                   <li>Avg. bugs/component with bugs: ${avg}</li>
                 </ul>
               </td>
+            </tr>
+            <tr>
+              <td>Component</td>
+              <td>&gt; M</td>
+              <td>≤ M</td>
+              <td>≤ W</td>
+              <td>All</td>
             </tr>
           </thead>
           <tbody>
