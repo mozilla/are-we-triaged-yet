@@ -139,7 +139,15 @@ function renderCounts(args) {
     }
   });
 }
-  
+
+function makeCell(bin) {
+  var cell = '0'; // default nothing
+  if (bin && bin.count) {
+    cell = `<a href="https://bugzilla.mozilla.org/buglist.cgi?bug_id=${bin.bugs.join(',')}">${bin.count}</a>`;
+  }
+  return cell;
+}
+
 function getTable(stats, version, report, all) {
   var str = '', rows = '';
   // refer to report data fields 
@@ -153,16 +161,16 @@ function getTable(stats, version, report, all) {
     rows += `<tr>
               <td>${rank.component}</td>
               <td>
-                ${rank.gt_month.count || 0}
+                ${makeCell(rank.gt_month)}
               </td>
               <td>
-                ${rank.lte_month.count || 0}
+                ${makeCell(rank.lte_month)}
               </td>
               <td>
-                ${rank.lte_week.count || 0}
+                ${makeCell(rank.lte_week)}
               </td>
               <td>
-                <a href="${reportFields.buglist}&amp;product=${encodeURIComponent(rank.productName)}&amp;component=${encodeURIComponent(rank.componentName)}">${rank.all.count}</a>
+                ${makeCell(rank.all)}
               </td>
             </tr>`;
   });
@@ -175,7 +183,7 @@ function getTable(stats, version, report, all) {
             <tr>
               <td colspan="5">
                 <ul>
-                  <li>All components: <a href="${reportFields.buglistAll}">${reportFields.count}</a> bugs</li>
+                  <li>All components: ${reportFields.count} bugs</li>
                   <li>Components with bugs: ${numComponents}</li>
                   <li>Avg. bugs/component with bugs: ${avg}</li>
                 </ul>
