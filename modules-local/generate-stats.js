@@ -132,10 +132,12 @@ var GenerateStats = function(config) {
                         } else {
                             buglistAll = query.buglist + productList;
                         }
+                        var ranks = rankComponents(data.bugs);
                         stats.versions[version.number][query.name] = {
                             title: query.title,
                             count: data.bugs.length,
-                            ranks: rankComponents(data.bugs)
+                            ages:  ranks.ages,
+                            ranks: ranks.ranks
                         };
                     })
                 })
@@ -147,6 +149,7 @@ var GenerateStats = function(config) {
     });
 
     function rankComponents(bugs) {
+        var ages = {};
         var buckets = {};
         var ranks = [];
         var now = moment.utc();
@@ -167,6 +170,12 @@ var GenerateStats = function(config) {
               group = 'lte_month';
             } else {
               group = 'gt_month';
+            }
+          
+            if (ages[group]) {
+              ages[group] ++;
+            } else {
+              ages[group] = 1;
             }
           
             if (!buckets[component]) {
@@ -213,7 +222,7 @@ var GenerateStats = function(config) {
             return(b.all.count - a.all.count);
         });
         
-        return ranks;
+        return { ranks: ranks, ages: ages};
     } 
     
     return Promise.all(requests).then(() => {

@@ -1,128 +1,23 @@
-var reportName, main, args;
+var main;
 
 document.onreadystatechange = () => {
   if (document.readyState === 'interactive') {
     main = document.querySelector('main');
-    args = getArguments();
-    if (args.counts) {
-      renderCounts(args);
-    } else { 
-      renderStats(args);
-    }
+    renderCounts();
   }
 };
-
-function getArguments() {
-  
-  var query = document.location.search;
-  var args  = { versions: 'all', reports: 'all', all: false, counts: false } 
-  
-  query.slice(1).split('&').forEach(pair => {
-    var kv = pair.split('=');
-    if (kv.length === 2) {
-      if (kv[0] === 'version') {
-        args.versions = kv[1]; 
-      }
-      if (kv[0] === 'report') {
-        args.reports = kv[1];
-      }
-    }
-    if (kv[0] === 'all') {
-      args.all = true; 
-    } 
-    if (kv[0] === 'counts') {
-      args.counts = true;
-    }
-  });
-
-  return args;
-  
-}  
-
-function getArgument(name, args, data) {
-  var response = [];
-  var allKeys = Object.keys(data);
-  
-  if (args[name] === 'all') {
-    response = allKeys;
-  } else {
-    args[name].split(',').forEach(value => {
-      if (allKeys.indexOf(value) > -1) {
-        response.push(value);
-      }
-    });
-  }
-  return response;
-}
 
 function renderTimestamp(data) {
   var timeStamp = document.querySelector('.last-updated');
   timeStamp.innerText = new Date(data).toLocaleString();
 }
 
-function renderStats(args) {
-  var versions;
-  var reportNames;
-  var all = false;
-  var reportTitles = {};
-  
-  if (args.all && args.all === true) {
-    all = true;
-  }
-
-  // clean up 
-  main.innerHTML = '';
-  
-  fetch('/data')
-  .then(response => {
-    if(response.ok) {
-      response.json()
-      .then(body => {
-        if (!body.stats) {
-          main.insertAdjacentHTML('beforeend', `<p>Still fetching data, will automatically reload.</p>`);
-        } else {
-          versions = getArgument('versions', args, body.stats.versions);
-          reportNames = getArgument('reports', args, body.stats.versions[versions[0]]);
-          
-          renderTimestamp(body.lastUpdate);
-
-          // hack to fix page grid when we display one report
-          if (reportNames.length === 1) {
-            document.body.classList.add('single-report');
-          }
-
-          reportNames.forEach(name => {
-            reportTitles[name] = body.stats.versions[versions[0]][name].title;
-          });
-          reportNames.forEach(name => {
-
-            //TODO: fix this hack 
-            if (reportNames.length === 1) {
-              document.querySelector('.report-name').textContent = reportTitles[name];
-            } else {
-              main.insertAdjacentHTML('beforeend', `<h3>${reportTitles[name]}</h3>`);
-            }
-
-            versions.forEach(version => {
-              main.insertAdjacentHTML('beforeend', 
-                                    getTable(body.stats.versions[version], version, name, all));
-            });
-          });
-        }
-      });
-    }
-  });
-}
-
-
-function renderCounts(args) {
+function renderCounts() {
   var all;
 
   // cleanup
   document.body.classList.add('single-report');
-  if (args.all && args.all === true) {
-    all = true;
-  }
+
   main.innerHTML = '';
   document.querySelector('.report-name').textContent = 'New Bug Counts';
 
@@ -181,12 +76,7 @@ function getTable(stats, version, report, all) {
             <tr>
               <td colspan="5">
                 <ul>
-                  <li>&gt; M: ${reportFields.ages.gt_month || 0}</li>
-                  <li>≤ M: ${reportFields.ages.lte_month || 0}</li>
-                  <li>≤ W: ${reportFields.ages.lte_week || 0}</li>
-                  <li>All: ${reportFields.count || 0}</li>
-                </ul>
-                </ul>
+                  <li>All components: ${reportFields.count} bugs</li>
                   <li>Components with bugs: ${numComponents}</li>
                   <li>Avg. bugs/component with bugs: ${avg}</li>
                 </ul>
