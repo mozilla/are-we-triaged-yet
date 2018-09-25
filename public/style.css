@@ -55,7 +55,7 @@ main {
 }
 
 body.single-report {
-  font-size: 2vw;
+  font-size: 1.75vw;
 }
 
 body.single-report header {
@@ -121,20 +121,24 @@ table.counts td:first-of-type {
 
 thead td {
   text-align: center;
-  font-size: small;
+  font-size: 75%;
 }
 
-tbody tr:first-of-type td {
-  border-top: solid 1px black;
+thead tr:last-of-type td {
+  font-size: 100%;
+  border-bottom: solid 1px black;
 }
 
 tbody td {
+  text-align: right;
   padding-left: 1vw;
+  padding-right: 1vw;
 }
 
-tbody td:nth-of-type(2n) {
-  text-align: right;
-  padding-right: 1vw;
+tbody td:first-of-type {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 tbody tr:nth-of-type(2n) {
