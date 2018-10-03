@@ -141,7 +141,7 @@ function renderCounts(args) {
 function makeCell(bin) {
   var cell = '0'; // default nothing
   if (bin && bin.count) {
-    cell = `<a href="https://bugzilla.mozilla.org/buglist.cgi?bug_id=${bin.bugs.join(',')}">${bin.count}</a>`;
+    cell = `<a href="https://bugzilla.mozilla.org/buglist.cgi?bug_id=${bin.bugs.join(',')}" target="_blank">${bin.count}</a>`;
   }
   return cell;
 }
