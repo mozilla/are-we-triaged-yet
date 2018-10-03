@@ -15,6 +15,7 @@ const config = {
   ]
 };
 var   data = {stats: false, message: 'not ready, please refetch'};
+var   nightly = config.versions[2].number;
 
 // Method to periodically run to generate stats
 
@@ -39,12 +40,31 @@ update();
 
 var app = express();
 
-// http://expressjs.com/en/starter/static-files.html
 app.use(express.static('public'));
 
-// http://expressjs.com/en/starter/basic-routing.html
 app.get("/", function (request, response) {
   response.sendFile(__dirname + '/views/index.html');
+});
+
+app.get("/counts", function(request, response) {
+  response.sendFile(__dirname + '/views/counts.html');
+});
+
+app.get("/summary", function(request, response) {
+  response.sendFile(__dirname + '/views/summary.html');
+});
+
+app.get("/text", function(request, response) {
+  var msg;
+
+  if (data.message === 'ok') {
+    msg = `I'm afraid we aren't triaged yet.
+          There are ${data.stats.versions[nightly].untriaged.count} untriaged bugs in nightly.`;
+  } else {
+    msg = "I'm still collecting data, please try again later.";
+  }
+  
+  response.send(msg);
 });
 
 app.get("/data", function (request, response) {
