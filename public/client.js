@@ -95,17 +95,18 @@ function renderStats(args) {
             reportTitles[name] = body.stats.versions[versions[0]][name].title;
           });
           reportNames.forEach(name => {
-
-            //TODO: fix this hack 
+            var reportTitle = reportTitles[name];
+            
             if (reportNames.length === 1) {
               document.querySelector('.report-name').textContent = reportTitles[name];
             } else {
-              main.insertAdjacentHTML('beforeend', `<h3>${reportTitles[name]}</h3>`);
+              main.insertAdjacentHTML('beforeend', `<h3>${reportTitle}</h3>`);
             }
 
             versions.forEach(version => {
               main.insertAdjacentHTML('beforeend', 
-                                    getTable(body.stats.versions[version], version, name, all));
+                                    getTable(reportTitle, body.stats.versions[version],
+                                             version, name, all));
             });
           });
         }
@@ -114,39 +115,17 @@ function renderStats(args) {
   });
 }
 
-
-function renderCounts(args) {
-  var all;
-
-  // cleanup
-  document.body.classList.add('single-report');
-  if (args.all && args.all === true) {
-    all = true;
-  }
-  main.innerHTML = '';
-  document.querySelector('.report-name').textContent = 'New Bug Counts';
-
-  fetch('/data')
-  .then(response => {
-    if(response.ok) {
-      response.json()
-      .then(body => {
-        renderTimestamp(body.lastUpdate);
-        main.insertAdjacentHTML('beforeend', getCountTable(body.stats.bugCounts, all));
-      })
-    }
-  });
-}
-
-function makeCell(bin) {
+function makeCell(reportTitle, bin, binName, component) {
   var cell = '0'; // default nothing
+  var title; 
   if (bin && bin.count) {
-    cell = `<a href="https://bugzilla.mozilla.org/buglist.cgi?bug_id=${bin.bugs.join(',')}">${bin.count}</a>`;
+    title = encodeURIComponent(reportTitle + ' bugs in ' + component + ' ' + binName);
+    cell = `<a href="https://bugzilla.mozilla.org/buglist.cgi?bug_id=${bin.bugs.join(',')}&amp;title=${title}" target="_blank">${bin.count}</a>`;
   }
   return cell;
 }
 
-function getTable(stats, version, report, all) {
+function getTable(reportTitle, stats, version, report, all) {
   var str = '', rows = '';
   // refer to report data fields 
   var reportFields = stats[report];
@@ -159,16 +138,20 @@ function getTable(stats, version, report, all) {
     rows += `<tr>
               <td>${rank.component}</td>
               <td>
-                ${makeCell(rank.gt_month)}
+                ${makeCell(reportTitle, rank.gt_month,
+                           'older than a month', rank.component)}
               </td>
               <td>
-                ${makeCell(rank.lte_month)}
+                ${makeCell(reportTitle, rank.lte_month,
+                           'older than a week, less than a month', rank.component)}
               </td>
               <td>
-                ${makeCell(rank.lte_week)}
+                ${makeCell(reportTitle, rank.lte_week,
+                           'less than a week old', rank.component)}
               </td>
               <td>
-                ${makeCell(rank.all)}
+                ${makeCell(reportTitle, rank.all,
+                           'total', rank.component)}
               </td>
             </tr>`;
   });
@@ -205,77 +188,5 @@ function getTable(stats, version, report, all) {
           </tbody>
         </table></div>`;
   
-  return str;
-}
-
-function getCountTable(data, all) {
-  var str = '', headers = '', tableBody ='', total = 0;
-  
-  // headers and total bug counts
-
-  tableBody += `<tr class="total">
-                  <td>Total</td>`;
-  Object.keys(data.dates).forEach(date => { 
-    var parsed = new Date(date);
-    var count = data.dates[date] || 0;
-    headers += `<th>${parsed.getUTCMonth() + 1}-${parsed.getUTCDate()}</th>`;
-    tableBody += `<td>${count}</td>`;
-    total += count;
-  });
-  tableBody += `\n<td>${total}</td>
-                    </tr>`;
-
-  // counts for each product
-  Object.keys(data.products).forEach(product => {
-    var total = 0, rows = [];
-    tableBody += `<tr class="product">
-                    <td>${product}</td>`;
-    Object.keys(data.dates).forEach(date => {
-      var count = data.products[product].dates[date] || 0;
-      tableBody += `<td>${count}</td>`;
-      total += count;
-    });
-    tableBody += `\n<td>${total}</td>
-            </tr>`;
-
-    // counts for each component
-    Object.keys(data.products[product].components).forEach(component => {
-      var total = 0;
-      var row = `<tr class="component">
-                  <td>${component}</td>`;
-      Object.keys(data.dates).forEach(date => {
-        var count = data.products[product].components[component].dates[date] || 0;
-        row += `<td>${count}</td>`;
-        total += count;
-      });
-      row += `\n<td>${total}</td>
-              </tr>`;  
-      rows.push({html: row, total: total});
-    });
-
-    // sort components by total decending
-    rows.sort((a, b) => {
-      return b.total - a.total;
-    });
-
-    // join rows for components in this product
-    rows.forEach(row => tableBody += row.html);
-  });
-  
-  str = `<div><table class="counts">
-            <thead>
-              <tr>
-                <th>Component</th>
-                ${headers}
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                ${tableBody}
-              </tr>
-            </tbody>
-          </table></div>`;
-
   return str;
 }
