@@ -9,15 +9,9 @@ const config = {
              'DevTools', 'NSPR', 'NSS', 'WebExtensions', 'Toolkit'],
   exclude: ['build conf', 'ca cert'], // components to exclude, can be partial strings
   versions: [
-<<<<<<< HEAD
     {number: 63, mergedate: '2018-06-25', betadate: '2018-09-04'},
     {number: 64, mergedate: '2018-09-04', betadate: '2018-10-23'},
     {number: 65, mergedate: '2018-10-22', betadate: '2018-12-10'}
-=======
-    {name: 'release', number: 63, mergedate: '2018-06-25', betadate: '2018-09-04'},
-    {name: 'beta', number: 64, mergedate: '2018-09-04', betadate: '2018-10-23'},
-    {name: 'nightly', number: 65, mergedate: '2018-10-22', betadata: '2018-12-10'}
->>>>>>> 5049495... #65 update column definitions
   ]
 };
 var   data = {stats: false, message: 'not ready, please refetch'};
