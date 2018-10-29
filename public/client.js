@@ -4,11 +4,7 @@ document.onreadystatechange = () => {
   if (document.readyState === 'interactive') {
     main = document.querySelector('main');
     args = getArguments();
-    if (args.counts) {
-      renderCounts(args);
-    } else { 
-      renderStats(args);
-    }
+    renderStats(args);
   }
 };
 
@@ -30,9 +26,6 @@ function getArguments() {
     if (kv[0] === 'all') {
       args.all = true; 
     } 
-    if (kv[0] === 'counts') {
-      args.counts = true;
-    }
   });
 
   return args;
