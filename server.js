@@ -86,9 +86,9 @@ function serializeData(data) {
   }
 }
 
-// update at 01:00 UTC
+// update at 14:00 UTC, 06:00 PST
 var rule = new schedule.RecurrenceRule();
-rule.hour = 1;
+rule.hour = 14;
 rule.minute = 0;
 
 var j = schedule.scheduleJob(rule, update);
