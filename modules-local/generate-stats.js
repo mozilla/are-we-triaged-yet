@@ -204,7 +204,7 @@ var GenerateStats = function(config) {
           
         });
         
-        // sort by totals
+        // sort by total of bug older than a week
         
         Object.keys(buckets).forEach(component => {
             var componentName = component.split('\:\:');
@@ -219,7 +219,7 @@ var GenerateStats = function(config) {
         });
         
         ranks.sort((a,b) => {
-            return(b.all.count - a.all.count);
+            return((b.gt_month.count + b.lte_month.count) - (a.gt_month.count + a.lte_month.count));
         });
         
         return { ranks: ranks, ages: ages};

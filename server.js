@@ -30,7 +30,7 @@ function update() {
 
 // update at midnight
 var rule = new schedule.RecurrenceRule();
-rule.hour = 0;
+rule.hour = 14;
 rule.minute = 0;
 
 var j = schedule.scheduleJob(rule, update);

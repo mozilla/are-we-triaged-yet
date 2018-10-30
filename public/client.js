@@ -4,11 +4,7 @@ document.onreadystatechange = () => {
   if (document.readyState === 'interactive') {
     main = document.querySelector('main');
     args = getArguments();
-    if (args.counts) {
-      renderCounts(args);
-    } else { 
-      renderStats(args);
-    }
+    renderStats(args);
   }
 };
 
@@ -30,9 +26,6 @@ function getArguments() {
     if (kv[0] === 'all') {
       args.all = true; 
     } 
-    if (kv[0] === 'counts') {
-      args.counts = true;
-    }
   });
 
   return args;
@@ -115,12 +108,23 @@ function renderStats(args) {
   });
 }
 
-function makeCell(reportTitle, bin, binName, component) {
+function makeCell(reportTitle, bins, binName, component) {
   var cell = '0'; // default nothing
   var title; 
-  if (bin && bin.count) {
+  var bin = {count: 0, bugs: []};
+  
+  bins.forEach(tranche => {
+    if (tranche && tranche.count) {
+      bin.count += tranche.count;
+      tranche.bugs.forEach(bug => {
+        bin.bugs.push(bug);
+      });
+    }
+  });
+  
+  if (bin && bin.count && bin.count > 0) {
     title = encodeURIComponent(reportTitle + ' bugs in ' + component + ' ' + binName);
-    cell = `<a href="https://bugzilla.mozilla.org/buglist.cgi?bug_id=${bin.bugs.join(',')}&amp;title=${title}" target="_blank">${bin.count}</a>`;
+    cell = `<a href="https://bugzilla.mozilla.org/buglist.cgi?bug_id=${bin.bugs.sort().join(',')}&amp;title=${title}" target="_blank">${bin.count}</a>`;
   }
   return cell;
 }
@@ -129,6 +133,9 @@ function getTable(reportTitle, stats, version, report, all) {
   var str = '', rows = '';
   // refer to report data fields 
   var reportFields = stats[report];
+  
+  if (!reportFields) { return ''; }
+  
   var numComponents = reportFields.ranks.length;
   var avg = (numComponents > 0) ? Math.floor(reportFields.count/numComponents) : 0;
   // if we don't show all, show top ten
@@ -138,19 +145,19 @@ function getTable(reportTitle, stats, version, report, all) {
     rows += `<tr>
               <td>${rank.component}</td>
               <td>
-                ${makeCell(reportTitle, rank.gt_month,
+                ${makeCell(reportTitle, [rank.gt_month],
                            'older than a month', rank.component)}
               </td>
               <td>
-                ${makeCell(reportTitle, rank.lte_month,
-                           'older than a week, less than a month', rank.component)}
+                ${makeCell(reportTitle, [rank.lte_month, rank.gt_month],
+                           'older than a week', rank.component)}
               </td>
               <td>
-                ${makeCell(reportTitle, rank.lte_week,
+                ${makeCell(reportTitle, [rank.lte_week],
                            'less than a week old', rank.component)}
               </td>
               <td>
-                ${makeCell(reportTitle, rank.all,
+                ${makeCell(reportTitle, [rank.all],
                            'total', rank.component)}
               </td>
             </tr>`;
@@ -165,7 +172,7 @@ function getTable(reportTitle, stats, version, report, all) {
               <td colspan="5">
                 <ul>
                   <li>&gt; M: ${reportFields.ages.gt_month || 0}</li>
-                  <li>≤ M: ${reportFields.ages.lte_month || 0}</li>
+                  <li>&gt; W: ${reportFields.ages.lte_month + reportFields.ages.gt_month || 0}</li>
                   <li>≤ W: ${reportFields.ages.lte_week || 0}</li>
                   <li>All: ${reportFields.count || 0}</li>
                 </ul>
@@ -177,10 +184,10 @@ function getTable(reportTitle, stats, version, report, all) {
             </tr>
             <tr>
               <td>Component</td>
-              <td>&gt; M</td>
-              <td>≤ M</td>
-              <td>≤ W</td>
-              <td>All</td>
+              <td title="NB: This column is counted in the &gt; W column total." style="color: #bb3016;">&gt; M</td>
+              <td title="Bugs older than a week (includes bugs from previous column)">&gt; W</td>
+              <td title="Bugs a week or less old">≤ W</td>
+              <td title="All untrigaged bugs">All</td>
             </tr>
           </thead>
           <tbody>
