@@ -133,6 +133,9 @@ function getTable(reportTitle, stats, version, report, all) {
   var str = '', rows = '';
   // refer to report data fields 
   var reportFields = stats[report];
+  
+  if (!reportFields) { return ''; }
+  
   var numComponents = reportFields.ranks.length;
   var avg = (numComponents > 0) ? Math.floor(reportFields.count/numComponents) : 0;
   // if we don't show all, show top ten
