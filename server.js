@@ -5,7 +5,7 @@ const GenerateStats = require('./modules-local/generate-stats');
 var   schedule = require('node-schedule');
 const config = {
   products: ['Core', 'External Software Affecting Firefox',
-             'Firefox', 'Firefox for iOS', 'Firefox for Android',
+             'Firefox', 'Firefox Build System', 'Firefox for iOS', 'Firefox for Android',
              'DevTools', 'NSPR', 'NSS', 'WebExtensions', 'Toolkit'],
   exclude: ['ca cert'], // components to exclude, can be partial strings
   versions: [
