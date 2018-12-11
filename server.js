@@ -7,11 +7,11 @@ const config = {
   products: ['Core', 'External Software Affecting Firefox',
              'Firefox', 'Firefox for iOS', 'Firefox for Android',
              'DevTools', 'NSPR', 'NSS', 'WebExtensions', 'Toolkit'],
-  exclude: ['build conf', 'ca cert'], // components to exclude, can be partial strings
+  exclude: ['ca cert'], // components to exclude, can be partial strings
   versions: [
-    {number: 63, mergedate: '2018-06-25', betadate: '2018-09-04'},
     {number: 64, mergedate: '2018-09-04', betadate: '2018-10-23'},
-    {number: 65, mergedate: '2018-10-22', betadate: '2018-12-10'}
+    {number: 65, mergedate: '2018-10-22', betadate: '2018-12-10'},
+    {number: 66, mergedate: '2018-12-10', betadate: '2019-01-28'}
   ]
 };
 var   data = {stats: false, message: 'not ready, please refetch'};
