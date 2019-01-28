@@ -9,9 +9,9 @@ const config = {
              'DevTools', 'GeckoView', 'NSPR', 'NSS', 'WebExtensions', 'Toolkit'],
   exclude: ['ca cert'], // components to exclude, can be partial strings
   versions: [
-    {number: 64, mergedate: '2018-09-04', betadate: '2018-10-23'},
     {number: 65, mergedate: '2018-10-22', betadate: '2018-12-10'},
-    {number: 66, mergedate: '2018-12-10', betadate: '2019-01-28'}
+    {number: 66, mergedate: '2018-12-10', betadate: '2019-01-28'},
+    {number: 67, mergedate: '2019-01-28', betadate: '2019-03-19'}
   ]
 };
 var   data = {stats: false, message: 'not ready, please refetch'};
