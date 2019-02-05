@@ -6,7 +6,7 @@ var   schedule = require('node-schedule');
 const config = {
   products: ['Core', 'External Software Affecting Firefox',
              'Firefox', 'Firefox Build System', 'Firefox for iOS', 'Firefox for Android',
-             'DevTools', 'GeckoView', 'NSPR', 'NSS', 'WebExtensions', 'Toolkit'],
+             'DevTools', 'GeckoView', 'NSPR', 'NSS', 'WebExtensions', 'Toolkit', 'Remote Protocol'],
   exclude: ['ca cert'], // components to exclude, can be partial strings
   versions: [
     {number: 65, mergedate: '2018-10-22', betadate: '2018-12-10'},
