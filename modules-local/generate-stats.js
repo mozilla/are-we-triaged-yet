@@ -9,7 +9,7 @@ var GenerateStats = function(config) {
       versions:   {}
     };
     var requests = [];
-    var versions, productList = '', exclusionList = 'none';
+    var versions, typeList, productList = '', exclusionList = 'none';
 
     if(config.versions && isArray(config.versions))
     {
@@ -24,6 +24,12 @@ var GenerateStats = function(config) {
         }, '');
     }
 
+    if (config.types && isArray(config.types)) {
+        typeList = config.types.reduce((list, type) => {
+            return list + '&bug_type=' + encodeURIComponent(type);
+        }, '');
+    }
+
     if (config.exclude && isArray(config.exclude)) {
         exclusionList = encodeURIComponent(config.exclude.reduce((list,component) => {
             return list + ',' + component;
@@ -34,7 +40,7 @@ var GenerateStats = function(config) {
     Count bugs filed in last week
     */
 
-    requests.push(fetch(`https://bugzilla.mozilla.org/rest/bug?include_fields=id,creation_time,status,resolution,component,product&chfield=%5BBug%20creation%5D&chfieldfrom=-2w&chfieldto=Now&email1=intermittent-bug-filer%40mozilla.bugs&emailreporter1=1&emailtype1=notequals&f1=component&f2=bug_severity&keywords=meta&keywords_type=nowords&limit=0&o1=nowordssubstr&o2=notequals${productList}&short_desc=%5E%5C%5Bmeta%5C%5D&short_desc_type=notregexp&v1=${exclusionList}&v2=enhancement`)
+    requests.push(fetch(`https://bugzilla.mozilla.org/rest/bug?include_fields=id,creation_time,status,resolution,component,product&chfield=%5BBug%20creation%5D&chfieldfrom=-2w&chfieldto=Now&email1=intermittent-bug-filer%40mozilla.bugs&emailreporter1=1&emailtype1=notequals&f1=component&f2=bug_severity&keywords=meta&keywords_type=nowords&limit=0&o1=nowordssubstr&o2=notequals${productList}${typeList}&short_desc=%5E%5C%5Bmeta%5C%5D&short_desc_type=notregexp&v1=${exclusionList}&v2=enhancement`)
         .then(response => {
             if (response.ok) {
                 response.json()
@@ -111,11 +117,11 @@ var GenerateStats = function(config) {
         var betadate   = version.betadate;
         var versionStr = 'firefox' + version.number;
         var queries    = [
-          {name: 'untriaged', title: 'Pending untriaged', url: `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component,creation_time,keywords&chfield=%5BBug%20creation%5D&chfieldfrom=${mergedate}&chfieldto=Now&f2=cf_status_${versionStr}&f3=bug_severity&f4=short_desc&f5=component&f6=keywords&limit=0&o2=anyexact&o3=notequals&o4=notsubstring&o5=nowordssubstr&o6=notequals&priority=--${productList}&resolution=---&short_desc=%5E%5C%5Bmeta&short_desc_type=notregexp&v2=%3F%2C---%2Caffected&v3=enhancement&v4=%5Bmeta%5D&v5=${exclusionList}&v6=stalled`},
-          {name: 'affecting', title:'P1 affecting or may affect', url: `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component,creation_time,keywords&f1=bug_severity&f10=CP&f11=component&f2=short_desc&f3=OP&f4=cf_status_${versionStr}&f5=OP&f6=cf_status_${versionStr}&f7=creation_ts&f8=CP&j3=OR&j5=OR&limit=0&o1=notequals&o11=nowordssubstr&o2=notregexp&o4=equals&o6=anywords&o7=greaterthaneq&priority=P1&${productList}&resolution=---&v1=enhancement&v11=${exclusionList}&v2=%5E%5C%5Bmeta&v4=affected&v6=---%2C%3F&v7=${mergedate}`},
-          {name: 'uplifted', title: 'Uplifted', url: 
+          {name: 'untriaged', title: 'Pending untriaged (defects only)', url: `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component,creation_time,keywords&chfield=%5BBug%20creation%5D&chfieldfrom=${mergedate}&chfieldto=Now&f2=cf_status_${versionStr}&f3=bug_severity&f4=short_desc&f5=component&f6=keywords&limit=0&o2=anyexact&o3=notequals&o4=notsubstring&o5=nowordssubstr&o6=notequals&priority=--${productList}${typeList}&resolution=---&short_desc=%5E%5C%5Bmeta&short_desc_type=notregexp&v2=%3F%2C---%2Caffected&v3=enhancement&v4=%5Bmeta%5D&v5=${exclusionList}&v6=stalled`},
+          {name: 'affecting', title:'P1 affecting or may affect (all types)', url: `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component,creation_time,keywords&f1=bug_severity&f10=CP&f11=component&f2=short_desc&f3=OP&f4=cf_status_${versionStr}&f5=OP&f6=cf_status_${versionStr}&f7=creation_ts&f8=CP&j3=OR&j5=OR&limit=0&o1=notequals&o11=nowordssubstr&o2=notregexp&o4=equals&o6=anywords&o7=greaterthaneq&priority=P1&${productList}&resolution=---&v1=enhancement&v11=${exclusionList}&v2=%5E%5C%5Bmeta&v4=affected&v6=---%2C%3F&v7=${mergedate}`},
+          {name: 'uplifted', title: 'Uplifted (all types)', url:
           `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component,creation_time,keywords&chfield=cf_status_${versionStr}&chfieldfrom=${betadate}&chfieldto=Now&chfieldvalue=fixed&f2=flagtypes.name&f5=attachments.ispatch&o2=equals&v2=approval-mozilla-beta%2B`, showAll: true},
-          {name: 'fix_or_defer', title: 'Fix or defer', url: `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component,creation_time,keywords&f1=component&f2=cf_status_${versionStr}&n1=1&o1=anywordssubstr&o2=equals&priority=P1${productList}&resolution=---&v1=${exclusionList}&v2=affected`}
+          {name: 'fix_or_defer', title: 'Fix or defer (all types)', url: `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component,creation_time,keywords&f1=component&f2=cf_status_${versionStr}&n1=1&o1=anywordssubstr&o2=equals&priority=P1${productList}&resolution=---&v1=${exclusionList}&v2=affected`}
         ];
  
         stats.versions[version.number] = {};
