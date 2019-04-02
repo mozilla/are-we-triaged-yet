@@ -8,6 +8,7 @@ const config = {
              'Firefox', 'Firefox Build System', 'Firefox for iOS', 'Firefox for Android',
              'DevTools', 'GeckoView', 'NSPR', 'NSS', 'WebExtensions', 'Toolkit', 'Remote Protocol'],
   exclude: ['ca cert'], // components to exclude, can be partial strings
+  types: ['defect'],
   versions: [
     {number: 66, mergedate: '2018-12-10', betadate: '2019-01-28'},
     {number: 67, mergedate: '2019-01-28', betadate: '2019-03-18'},
