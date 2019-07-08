@@ -1,4 +1,8 @@
-'use strict'
+/* jshint -W097 */
+/* jshint esversion: 6 */
+/* jshint node: true */
+
+"use strict";
 
 const express = require('express');
 const GenerateStats = require('./modules-local/generate-stats');
