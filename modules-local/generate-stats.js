@@ -1,3 +1,7 @@
+/* jshint -W097 */
+/* jshint esversion: 6 */
+/* jshint node: true */
+
 'use strict';
 
 const fetch = require('node-fetch');
@@ -46,7 +50,7 @@ var GenerateStats = function(config) {
                 response.json()
                 .then(data => {
                     processData(data);
-                })
+                });
             }
         })
         .catch(err => {
@@ -79,23 +83,23 @@ var GenerateStats = function(config) {
             // product counts
             if (counts.products[bug.product]) {
                 if (counts.products[bug.product].dates[dateString]) {
-                    counts.products[bug.product].dates[dateString] ++
+                    counts.products[bug.product].dates[dateString] ++;
                 } else {
-                    counts.products[bug.product].dates[dateString] = 1
+                    counts.products[bug.product].dates[dateString] = 1;
                 }
             } else {
                 counts.products[bug.product] = {};
                 counts.products[bug.product].dates = {};
-                counts.products[bug.product].components = {}
+                counts.products[bug.product].components = {};
                 counts.products[bug.product].dates[dateString] = 1;
             }
 
             // component counts
             if (counts.products[bug.product].components[bug.component]) {
                 if (counts.products[bug.product].components[bug.component].dates[dateString]) {
-                    counts.products[bug.product].components[bug.component].dates[dateString] ++
+                    counts.products[bug.product].components[bug.component].dates[dateString] ++;
                 } else {
-                    counts.products[bug.product].components[bug.component].dates[dateString] = 1
+                    counts.products[bug.product].components[bug.component].dates[dateString] = 1;
                 }
             } else {
                 counts.products[bug.product].components[bug.component] = {};
@@ -117,7 +121,8 @@ var GenerateStats = function(config) {
         var betadate   = version.betadate;
         var versionStr = 'firefox' + version.number;
         var queries    = [
-          {name: 'untriaged', title: 'Pending untriaged (defects only)', url: `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component,creation_time,keywords&chfield=%5BBug%20creation%5D&chfieldfrom=${mergedate}&chfieldto=Now&f2=cf_status_${versionStr}&f3=bug_severity&f4=short_desc&f5=component&f6=keywords&limit=0&o2=anyexact&o3=notequals&o4=notsubstring&o5=nowordssubstr&o6=notequals&priority=--${productList}${typeList}&resolution=---&short_desc=%5E%5C%5Bmeta&short_desc_type=notregexp&v2=%3F%2C---%2Caffected&v3=enhancement&v4=%5Bmeta%5D&v5=${exclusionList}&v6=stalled`},
+          {name: 'needinfo', title: 'Pending untriaged w/needinfo (defects only)', url: `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component,creation_time,keywords&chfield=%5BBug%20creation%5D&chfieldfrom=${mergedate}&chfieldto=Now&f2=cf_status_${versionStr}&f3=bug_severity&f4=short_desc&f5=component&f6=keywords&f8=flagtypes.name&limit=0&o2=anyexact&o3=notequals&o4=notsubstring&o5=nowordssubstr&o6=notequals&o8=substring&priority=--${productList}${typeList}&resolution=---&short_desc=%5E%5C%5Bmeta&short_desc_type=notregexp&v2=%3F%2C---%2Caffected&v3=enhancement&v4=%5Bmeta%5D&v5=${exclusionList}&v6=stalled&v8=needinfo`},
+          {name: 'untriaged', title: 'Pending untriaged w/o needinfo (defects only)', url: `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component,creation_time,keywords&chfield=%5BBug%20creation%5D&chfieldfrom=${mergedate}&chfieldto=Now&f2=cf_status_${versionStr}&f3=bug_severity&f4=short_desc&f5=component&f6=keywords&f8=flagtypes.name&limit=0&o2=anyexact&o3=notequals&o4=notsubstring&o5=nowordssubstr&o6=notequals&o8=notsubstring&priority=--${productList}${typeList}&resolution=---&short_desc=%5E%5C%5Bmeta&short_desc_type=notregexp&v2=%3F%2C---%2Caffected&v3=enhancement&v4=%5Bmeta%5D&v5=${exclusionList}&v6=stalled&v8=needinfo`},
           {name: 'affecting', title:'P1 affecting or may affect (all types)', url: `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component,creation_time,keywords&f1=bug_severity&f10=CP&f11=component&f2=short_desc&f3=OP&f4=cf_status_${versionStr}&f5=OP&f6=cf_status_${versionStr}&f7=creation_ts&f8=CP&j3=OR&j5=OR&limit=0&o1=notequals&o11=nowordssubstr&o2=notregexp&o4=equals&o6=anywords&o7=greaterthaneq&priority=P1&${productList}&resolution=---&v1=enhancement&v11=${exclusionList}&v2=%5E%5C%5Bmeta&v4=affected&v6=---%2C%3F&v7=${mergedate}`},
           {name: 'uplifted', title: 'Uplifted (all types)', url:
           `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component,creation_time,keywords&chfield=cf_status_${versionStr}&chfieldfrom=${betadate}&chfieldto=Now&chfieldvalue=fixed&f2=flagtypes.name&f5=attachments.ispatch&o2=equals&v2=approval-mozilla-beta%2B`, showAll: true},
@@ -145,7 +150,7 @@ var GenerateStats = function(config) {
                             ages:  ranks.ages,
                             ranks: ranks.ranks
                         };
-                    })
+                    });
                 })
                 .catch(err => {
                     console.error(err + ', ' + query.name);
@@ -236,6 +241,6 @@ var GenerateStats = function(config) {
     })
     .catch(err => console.log(err));
     
-}
+};
 
-module.exports = GenerateStats
+module.exports = GenerateStats;
