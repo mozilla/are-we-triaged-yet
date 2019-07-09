@@ -1,3 +1,5 @@
+/* jshint esversion: 6 */
+
 var reportName, main, args;
 
 document.onreadystatechange = () => {
@@ -11,7 +13,7 @@ document.onreadystatechange = () => {
 function getArguments() {
   
   var query = document.location.search;
-  var args  = { versions: 'all', reports: 'all', all: false, counts: false } 
+  var args  = { versions: 'all', reports: 'all', all: false, counts: false };
   
   query.slice(1).split('&').forEach(pair => {
     var kv = pair.split('=');
