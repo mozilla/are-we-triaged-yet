@@ -180,9 +180,6 @@ function getTable(reportTitle, stats, version, report, all) {
   str = `<div><table>
           <thead>
             <tr>
-              <th colspan="7">Release Cycle for Firefox <span class="versionNumber">${version}</span></th>
-            </tr>
-            <tr>
               <td colspan="7">
                 <ul>
                   <li>&gt; M: ${reportFields.ages.gt_month || 0 }</li>
@@ -190,7 +187,7 @@ function getTable(reportTitle, stats, version, report, all) {
                   <li>≤ W: ${reportFields.ages.lte_week || 0 }</li>
                   <li>Nightly: ${reportFields.trains.nightly || 0 }</li>
                   <li>Beta: ${reportFields.trains.beta | 0 }</li>
-                  <li>Release: ${reportFields.trains.release || 0 }<li></li>
+                  <li>Release: ${reportFields.trains.release || 0 }</li>
                   <li>All: ${reportFields.count || 0 }</li>
                 </ul>
                 </ul>
@@ -200,14 +197,18 @@ function getTable(reportTitle, stats, version, report, all) {
               </td>
             </tr>
             <tr>
-              <td>Component</td>
+              <th rowspan="2" width="40%">Component</th>
+              <th colspan="3">Age</th>  
+              <th colspan="3">Release</th>
+              <th rowspan="2">All</th>
+            </tr>
+            <tr>
               <td title="NB: This column is counted in the &gt; W column total." style="color: #bb3016;">&gt; M</td>
               <td title="Bugs older than a week (includes bugs from previous column)">&gt; W</td>
               <td title="Bugs a week or less old">≤ W</td>
               <td title="Bugs filed during current nightly">Nightly</td>
               <td title="Bugs filed during current beta">Beta</td>
               <td title="Bugs filed during current release">Release</td>
-              <td title="All untrigaged bugs">All</td>
             </tr>
           </thead>
           <tbody>
