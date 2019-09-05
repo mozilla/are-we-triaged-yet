@@ -159,6 +159,18 @@ function getTable(reportTitle, stats, version, report, all) {
                            'less than a week old', rank.component)}
               </td>
               <td>
+                ${makeCell(reportTitle, [rank.nightly],
+                    'nightly', rank.component)}
+              </td>
+              <td>
+                ${makeCell(reportTitle, [rank.beta],
+                  'beta', rank.component)}
+              </td>
+              <td>
+                ${makeCell(reportTitle, [rank.release],
+                  'release', rank.component)}
+              </td>
+              <td>
                 ${makeCell(reportTitle, [rank.all],
                            'total', rank.component)}
               </td>
@@ -168,15 +180,18 @@ function getTable(reportTitle, stats, version, report, all) {
   str = `<div><table>
           <thead>
             <tr>
-              <th colspan="5">Firefox <span class="versionNumber">${version}</span></th>
+              <th colspan="7">Release Cycle for Firefox <span class="versionNumber">${version}</span></th>
             </tr>
             <tr>
-              <td colspan="5">
+              <td colspan="7">
                 <ul>
-                  <li>&gt; M: ${reportFields.ages.gt_month || 0}</li>
-                  <li>&gt; W: ${reportFields.ages.lte_month + reportFields.ages.gt_month || 0}</li>
-                  <li>≤ W: ${reportFields.ages.lte_week || 0}</li>
-                  <li>All: ${reportFields.count || 0}</li>
+                  <li>&gt; M: ${reportFields.ages.gt_month || 0 }</li>
+                  <li>&gt; W: ${reportFields.ages.lte_month + reportFields.ages.gt_month || 0 }</li>
+                  <li>≤ W: ${reportFields.ages.lte_week || 0 }</li>
+                  <li>Nightly: ${reportFields.trains.nightly || 0 }</li>
+                  <li>Beta: ${reportFields.trains.beta | 0 }</li>
+                  <li>Release: ${reportFields.trains.release || 0 }<li></li>
+                  <li>All: ${reportFields.count || 0 }</li>
                 </ul>
                 </ul>
                   <li>Components with bugs: ${numComponents}</li>
@@ -189,6 +204,9 @@ function getTable(reportTitle, stats, version, report, all) {
               <td title="NB: This column is counted in the &gt; W column total." style="color: #bb3016;">&gt; M</td>
               <td title="Bugs older than a week (includes bugs from previous column)">&gt; W</td>
               <td title="Bugs a week or less old">≤ W</td>
+              <td title="Bugs filed during current nightly">Nightly</td>
+              <td title="Bugs filed during current beta">Beta</td>
+              <td title="Bugs filed during current release">Release</td>
               <td title="All untrigaged bugs">All</td>
             </tr>
           </thead>
