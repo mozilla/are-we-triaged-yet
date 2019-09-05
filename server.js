@@ -1,17 +1,22 @@
-'use strict'
+/* jshint -W097 */
+/* jshint esversion: 6 */
+/* jshint node: true */
+
+"use strict";
 
 const express = require('express');
 const GenerateStats = require('./modules-local/generate-stats');
 var   schedule = require('node-schedule');
 const config = {
   products: ['Core', 'External Software Affecting Firefox',
-             'Firefox', 'Firefox for iOS', 'Firefox for Android',
-             'DevTools', 'NSPR', 'NSS', 'WebExtensions', 'Toolkit'],
-  exclude: ['build conf', 'ca cert'], // components to exclude, can be partial strings
+             'Firefox', 'Firefox Build System', 'Firefox for iOS', 'Firefox for Android',
+             'DevTools', 'GeckoView', 'NSPR', 'NSS', 'WebExtensions', 'Toolkit', 'Remote Protocol'],
+  exclude: ['ca cert'], // components to exclude, can be partial strings
+  types: ['defect'],
   versions: [
-    {name: 'release', number: 63, mergedate: '2018-06-25', betadate: '2018-09-04'},
-    {name: 'beta', number: 64, mergedate: '2018-09-04', betadate: '2018-10-23'},
-    {name: 'nightly', number: 65, mergedate: '2018-10-22', betadata: '2018-12-10'}
+    {number: 69, mergedate: '2019-05-20', betadate: '2019-07-08', releasedate: '2019-09-03'},
+    {number: 70, mergedate: '2019-07-08', betadate: '2019-09-02', releasedate: '2019-10-22'},
+    {number: 71, mergedate: '2019-09-02', betadate: '2019-10-21', releasedate: '2019-12-03'}
   ]
 };
 var   data = {stats: false, message: 'not ready, please refetch'};
