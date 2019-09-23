@@ -10,6 +10,8 @@ document.onreadystatechange = () => {
   }
 };
 
+document.setInterval(renderStats, 60*1000, args);
+
 function getArguments() {
   
   var query = document.location.search;
@@ -198,8 +200,8 @@ function getTable(reportTitle, stats, version, report, all) {
             </tr>
             <tr>
               <th rowspan="2" width="40%">Component</th>
-              <th colspan="3">Age</th>  
-              <th colspan="3">Release</th>
+              <th colspan="3">Bugs open since date reported:</th>
+              <th colspan="3">Bugs still open since the branch date of the current:</th>
               <th rowspan="2">All</th>
             </tr>
             <tr>
