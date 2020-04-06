@@ -14,9 +14,9 @@ const config = {
   exclude: ['ca cert'], // components to exclude, can be partial strings
   types: ['defect'],
   versions: [
-    {number: 74, mergedate: '2020-01-06', betadate: '2020-02-11', releasedate: '2020-03-11'},
     {number: 75, mergedate: '2020-02-10', betadate: '2020-03-10', releasedate: '2020-04-07'},
-    {number: 76, mergedate: '2020-03-09', betadate: '2020-04-07', releasedate: '2020-05-05'}
+    {number: 76, mergedate: '2020-03-09', betadate: '2020-04-07', releasedate: '2020-05-05'},
+    {number: 77, mergedate: '2020-04-06', betadate: '2020-05-05', releasedate: '2020-06-02'}
   ]
 };
 var   data = {stats: false, message: 'not ready, please refetch'};
