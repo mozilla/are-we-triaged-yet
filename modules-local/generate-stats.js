@@ -7,6 +7,7 @@
 const fetch = require('node-fetch');
 const moment = require('moment');
 const isArray = require('util').isArray;
+const BASEURL = "https://bugzilla.mozilla.org/rest/bug";
 
 var GenerateStats = function(config) {
     var stats = {
@@ -44,7 +45,7 @@ var GenerateStats = function(config) {
     Count bugs filed in last week
     */
 
-    requests.push(fetch(`https://bugzilla.mozilla.org/rest/bug?include_fields=id,creation_time,status,resolution,component,product&chfield=%5BBug%20creation%5D&chfieldfrom=-2w&chfieldto=Now&email1=intermittent-bug-filer%40mozilla.bugs&emailreporter1=1&emailtype1=notequals&f1=component&f2=bug_severity&keywords=meta&keywords_type=nowords&limit=0&o1=nowordssubstr&o2=notequals${productList}&short_desc=%5E%5C%5Bmeta%5C%5D&short_desc_type=notregexp&v1=${exclusionList}&v2=enhancement`)
+    requests.push(fetch(`${BASEURL}?include_fields=id,creation_time,status,resolution,component,product&chfield=%5BBug%20creation%5D&chfieldfrom=-2w&chfieldto=Now&email1=intermittent-bug-filer%40mozilla.bugs&emailreporter1=1&emailtype1=notequals&f1=component&f2=bug_severity&keywords=meta&keywords_type=nowords&limit=0&o1=nowordssubstr&o2=notequals${productList}&short_desc=%5E%5C%5Bmeta%5C%5D&short_desc_type=notregexp&v1=${exclusionList}&v2=enhancement`)
         .then(response => {
             if (response.ok) {
                 response.json()
@@ -119,10 +120,26 @@ var GenerateStats = function(config) {
     var mergedate  = version.mergedate;
     var betadate   = version.betadate;
     var versionStr = 'firefox' + version.number;
-    var queries    = [
-        {name: 'all', title: 'Pending untriaged bugs (all types)', url: `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component,creation_time,keywords&chfield=%5BBug%20creation%5D&chfield=%5BBug%20creation%5D&chfieldfrom=${mergedate}&classification=Client%20Software&classification=Developer%20Infrastructure&classification=Components&classification=Server%20Software&email1=intermittent-bug-filer%40mozilla.bugs&email2=wptsync%40mozilla.bugs&emailreporter1=1&emailreporter2=1&emailtype1=notequals&emailtype2=notequals&f1=component&f2=OP&f3=cf_status_firefox_nightly&f4=cf_status_firefox_beta&f5=cf_status_firefox_release&f6=cf_status_firefox_esr&f7=bug_type&f8=CP&f9=bug_severity&j_top=OR&limit=0&o1=equals&o3=equals&o4=equals&o5=equals&o6=equals&o7=equals&o9=equals&resolution=---&v1=untriaged&v3=---&v4=---&v5=---&v6=---&v7=defect&v9=--`},
-        {name: 'needinfo', title: 'Pending untriaged w/needinfo (defects only)', url: `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component,creation_time,keywords&chfield=%5BBug%20creation%5D&chfield=%5BBug%20creation%5D&chfieldfrom=${mergedate}&classification=Client%20Software&classification=Developer%20Infrastructure&classification=Components&classification=Server%20Software&email1=intermittent-bug-filer%40mozilla.bugs&email2=wptsync%40mozilla.bugs&emailreporter1=1&emailreporter2=1&emailtype1=notequals&emailtype2=notequals&f1=bug_type&f10=CP&f11=bug_severity&f12=CP&f2=flagtypes.name&f3=OP&f4=component&f5=OP&f6=cf_status_firefox_nightly&f7=cf_status_firefox_beta&f8=cf_status_firefox_release&f9=cf_status_firefox_esr&j3=OR&o1=equals&o11=equals&o2=substring&o4=equals&o6=equals&o7=equals&o8=equals&o9=equals&resolution=---&v1=defect&v11=--&v2=needinfo%3F&v4=untriaged&v6=---&v7=---&v8=---&v9=---`},
-        {name: 'untriaged', title: 'Pending untriaged w/o needinfo (defects only)', url: `https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status,product,component,creation_time,keywords&chfield=%5BBug%20creation%5D&chfield=%5BBug%20creation%5D&chfieldfrom=${mergedate}&classification=Client%20Software&classification=Developer%20Infrastructure&classification=Components&classification=Server%20Software&email1=intermittent-bug-filer%40mozilla.bugs&email2=wptsync%40mozilla.bugs&emailreporter1=1&emailreporter2=1&emailtype1=notequals&emailtype2=notequals&f1=bug_type&f10=CP&f11=bug_severity&f12=CP&f2=flagtypes.name&f3=OP&f4=component&f5=OP&f6=cf_status_firefox_nightly&f7=cf_status_firefox_beta&f8=cf_status_firefox_release&f9=cf_status_firefox_esr&j3=OR&known_name=Untriaged%20Bugs%20%28Severity%20Based%29%20w%2Fo%20needinfo&o1=equals&o11=equals&o2=notsubstring&o4=equals&o6=equals&o7=equals&o8=equals&o9=equals&resolution=---&v1=defect&v11=--&v2=needinfo%3F&v4=untriaged&v6=---&v7=---&v8=---&v9=---`}
+
+    var baseQuery = `include_fields=id,summary,status,product,component,creation_time,keywords&bug_severity=--&bug_severity=N%2FA&bug_type=defect&chfield=%5BBug%20creation%5D&chfieldfrom=${mergedate}&classification=Client%20Software&classification=Developer%20Infrastructure&classification=Components&classification=Server%20Software&columnlist=opendate%2Cshort_desc%2Cpriority%2Cbug_severity%2Ctriage_owner%2Cproduct%2Ccomponent%2Cbug_status%2Cresolution%2Creporter%2Creporter_realname%2Cassigned_to%2Cchangeddate&email1=intermittent-bug-filer%40mozilla.bugs&email2=wptsync%40mozilla.bugs&emailreporter1=1&emailreporter2=1&emailtype1=notequals&emailtype2=notequals&resolution=---`;
+
+    var queries = [
+        {
+            name: 'all',
+            title: 'Pending untriaged bugs (all types)',
+            url: `${BASEURL}?${baseQuery}`
+        },
+        {
+            name: 'needinfo',
+            title: 'Pending untriaged w/needinfo (defects only)',
+            url: `${BASEURL}?${baseQuery}&f1=flagtypes.name&o1=substring&v1=needinfo%3F`
+        },
+        {
+            name: 'untriaged',
+            title: 'Pending untriaged w/o needinfo (defects only)',
+            url: `${BASEURL}?${baseQuery}&f1=flagtypes.name&o1=notsubstring&v1=needinfo%3F`
+        }
+
     ];
 
     stats.versions[version.number] = {};
@@ -131,6 +148,7 @@ var GenerateStats = function(config) {
     var nightly_merge_date = new moment(versions[2].mergedate);
 
     queries.forEach(query => {
+        console.log (query.url);
         requests.push(fetch(query.url)
             .then(response => {
                 if (response.ok)
