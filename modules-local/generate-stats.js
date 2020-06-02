@@ -126,7 +126,7 @@ var GenerateStats = function(config) {
     var queries = [
         {
             name: 'all',
-            title: 'Pending untriaged bugs (all types)',
+            title: 'Pending untriaged bugs (defects only)',
             url: `${BASEURL}?${baseQuery}`
         },
         {
