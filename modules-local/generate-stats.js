@@ -121,7 +121,7 @@ var GenerateStats = function(config) {
     var betadate   = version.betadate;
     var versionStr = 'firefox' + version.number;
 
-    var baseQuery = `include_fields=id,summary,status,product,component,creation_time,keywords&bug_severity=--&bug_severity=N%2FA&bug_type=defect&chfield=%5BBug%20creation%5D&chfieldfrom=${mergedate}&classification=Client%20Software&classification=Developer%20Infrastructure&classification=Components&classification=Server%20Software&columnlist=opendate%2Cshort_desc%2Cpriority%2Cbug_severity%2Ctriage_owner%2Cproduct%2Ccomponent%2Cbug_status%2Cresolution%2Creporter%2Creporter_realname%2Cassigned_to%2Cchangeddate&email1=intermittent-bug-filer%40mozilla.bugs&email2=wptsync%40mozilla.bugs&emailreporter1=1&emailreporter2=1&emailtype1=notequals&emailtype2=notequals&resolution=---`;
+    var baseQuery = `include_fields=id,summary,status,product,component,creation_time,keywords&keywords=intermittent-failure&keywords_type=nowords&bug_severity=--&bug_severity=N%2FA&bug_type=defect&chfield=%5BBug%20creation%5D&chfieldfrom=${mergedate}&classification=Client%20Software&classification=Developer%20Infrastructure&classification=Components&classification=Server%20Software&email1=wptsync%40mozilla.bugs&emailreporter1=1&emailtype1=notequals&resolution=---`;
 
     var queries = [
         {
