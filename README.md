@@ -2,7 +2,7 @@
 
 Triage stats for Nightly and Beta. Deployed on https://are-we-triaged-yet.herokuapp.com/
 
-Use `npm initialize` and `npm run` to start and make a note of the URL returned in the console. 
+Use `npm install` and `npm run start` to start and make a note of the URL returned in the console.
 
 ## Query string arguments
 
